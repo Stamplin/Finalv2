@@ -13,14 +13,14 @@ namespace Finalv2
         Texture2D backgroundTexture, tempArm;
         //game variables
         float armRotation = 0.4f;
-        float aiPushForce = 0.04f; //ai strength
+        float aiPushForce = 0.02f; //ai strength
 
         KeyboardState keyboardState, prevKeyboardState;
 
         const float minRotation = -0.3f; //left
         const float maxRotation = 1.3f;  //right
         const float returnSpeed = 0.01f;  //speed at which the arm resets
-        const float moveStep = 0.1f; //spacebar power
+        const float moveStep = 0.09f; //spacebar power
 
         bool aiActivated = false;
         bool isFrozen = false;
@@ -124,7 +124,7 @@ namespace Finalv2
                 }
                 else if (armRotation < 0.4f)
                 {
-                    armRotation += returnSpeed;
+                    armRotation += ((returnSpeed)/2);
                 }
             }
 
