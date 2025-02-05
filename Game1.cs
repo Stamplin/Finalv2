@@ -13,6 +13,7 @@ namespace Finalv2
         Texture2D backgroundTexture, tempArm;
         //game variables
         float armRotation = 0.4f;
+        float aiPushForce = 0.02f; //ai strength
 
         KeyboardState keyboardState, prevKeyboardState;
 
@@ -20,6 +21,9 @@ namespace Finalv2
         const float maxRotation = 1.3f;  //right
         const float returnSpeed = 0.01f;  // Speed at which the arm resets
         const float moveStep = 0.1f; //spacebar power
+
+        bool aiActivated = false;
+        bool isFrozen = false;
 
         public Game1()
         {
@@ -59,35 +63,59 @@ namespace Finalv2
 
             // TODO: Add your update logic here
 
+            //reset
+            if (keyboardState.IsKeyDown(Keys.R))
+            {
+                armRotation = 0.4f;
+                isFrozen = false;
+                aiActivated = false;
+            }
+
+            if (isFrozen)
+                return;
+
+            //play need to press space
+            if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+            {
+                armRotation -= moveStep; 
+                aiActivated = true;  
+            }
+            //start only when the player is ready
+            if (aiActivated && armRotation < maxRotation)
+            {
+                armRotation += aiPushForce;
+            }
+
             //every space press moves the arm to the left counterclockwise
             if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
             {
                 armRotation -= moveStep;
             }
 
-            // Rotate left (counterclockwise)
-            if (Keyboard.GetState().IsKeyDown(Keys.Left))
+            //rotate left (counterclockwise)
+            if (keyboardState.IsKeyDown(Keys.Left) && armRotation > minRotation)
             {
                 armRotation -= 0.03f;
             }
 
-            // Rotate right (clockwise)
-            if (Keyboard.GetState().IsKeyDown(Keys.Right))
+            //rotate right (clockwise)
+            if (keyboardState.IsKeyDown(Keys.Right) && armRotation < maxRotation)
             {
                 armRotation += 0.03f;
             }
 
-            // Prevent arm from exceeding min/max rotation
-            if (armRotation < minRotation)
+            //prevent arm from exceeding min/max rotation
+            if (armRotation <= minRotation)
             {
                 armRotation = minRotation;
+                isFrozen = true;
             }
-            else if (armRotation > maxRotation)
+            else if (armRotation >= maxRotation)
             {
                 armRotation = maxRotation;
             }
 
-            // Return to orginal pos
+            //return to orginal pos
             if (!keyboardState.IsKeyDown(Keys.Left) && !keyboardState.IsKeyDown(Keys.Right) & !(keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space)))
             {
                 if (armRotation > 0.4f)
@@ -99,8 +127,6 @@ namespace Finalv2
                     armRotation += returnSpeed;
                 }
             }
-
-
 
             base.Update(gameTime);
         }
