@@ -14,6 +14,13 @@ namespace Finalv2
         //game variables
         float armRotation = 0.4f;
 
+        KeyboardState keyboardState, prevKeyboardState;
+
+        const float minRotation = -0.3f; //left
+        const float maxRotation = 1.3f;  //right
+        const float returnSpeed = 0.01f;  // Speed at which the arm resets
+        const float moveStep = 0.1f; //spacebar power
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -47,46 +54,50 @@ namespace Finalv2
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            prevKeyboardState = keyboardState;
+            keyboardState = Keyboard.GetState();
+
             // TODO: Add your update logic here
 
-            //limt arm movement so it wont go past a position
-            if (armRotation > 1f)
+            //every space press moves the arm to the left counterclockwise
+            if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
             {
-                armRotation = 0.5f;
-            }
-            else if (armRotation < 1f)
-            {
-                armRotation = 0.5f;
+                armRotation -= moveStep;
             }
 
-
-
-
-            //intitial arm rotation position
-            if (Keyboard.GetState().IsKeyDown(Keys.R))
-            {
-                armRotation = 0.4f;
-            }
-
-            //when left arrow is pressed arm spin counterclockwise
+            // Rotate left (counterclockwise)
             if (Keyboard.GetState().IsKeyDown(Keys.Left))
             {
-                armRotation -= 0.1f;
-            }
-            //when right arrow is pressed arm spin clockwise
-            if (Keyboard.GetState().IsKeyDown(Keys.Right))
-            {
-                armRotation += 0.1f;
+                armRotation -= 0.03f;
             }
 
-            //make the arm slowly return to centre at armRotation = 0.4f;
-            if (armRotation > 0.4f)
+            // Rotate right (clockwise)
+            if (Keyboard.GetState().IsKeyDown(Keys.Right))
             {
-                armRotation -= 0.02f;
+                armRotation += 0.03f;
             }
-            else if (armRotation < 0.4f)
+
+            // Prevent arm from exceeding min/max rotation
+            if (armRotation < minRotation)
             {
-                armRotation += 0.02f;
+                armRotation = minRotation;
+            }
+            else if (armRotation > maxRotation)
+            {
+                armRotation = maxRotation;
+            }
+
+            // Return to orginal pos
+            if (!keyboardState.IsKeyDown(Keys.Left) && !keyboardState.IsKeyDown(Keys.Right) & !(keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space)))
+            {
+                if (armRotation > 0.4f)
+                {
+                    armRotation -= returnSpeed;
+                }
+                else if (armRotation < 0.4f)
+                {
+                    armRotation += returnSpeed;
+                }
             }
 
 
@@ -103,7 +114,7 @@ namespace Finalv2
             _spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1280, 720), Color.White);
 
             //draw arm and spin/roate it based on the armRotation variable
-            _spriteBatch.Draw(tempArm, new Vector2(700, 530), null, Color.White, armRotation, new Vector2(tempArm.Width / 2, tempArm.Height / 2), 1.0f, SpriteEffects.None, 0f);
+            _spriteBatch.Draw(tempArm, new Vector2(700, 570), null, Color.White, armRotation, new Vector2(tempArm.Width / 2, tempArm.Height / 2), 1.0f, SpriteEffects.None, 0f);
 
             _spriteBatch.End();
 
