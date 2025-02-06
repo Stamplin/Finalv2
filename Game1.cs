@@ -81,6 +81,11 @@ namespace Finalv2
                 aiActivated = false;
                 gameWinStatus = 0;
             }
+            //if winstat 2 then it freezes
+            if (gameWinStatus == 2)
+            {
+                isFrozen = true;
+            }
 
             if (isFrozen)
                 return;
