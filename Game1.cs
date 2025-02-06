@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -8,9 +10,6 @@ namespace Finalv2
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-
-
-        //random number gen
 
         //import texture
         Texture2D backgroundTexture, tempArm;
@@ -31,6 +30,10 @@ namespace Finalv2
         //0 = nothing
         //1 = win
         //2 = loss
+
+        //random number generator
+        Random rnd = new Random();
+       
 
         public Game1()
         {
