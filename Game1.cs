@@ -12,7 +12,7 @@ namespace Finalv2
         //import texture
         Texture2D backgroundTexture, tempArm;
         //game variables
-        float armRotation = 0.4f;
+        float armRotation = 0.1f; //so the cool animation play and get it shaky
         float aiPushForce = 0.02f; //ai strength
 
         KeyboardState keyboardState, prevKeyboardState;
@@ -115,6 +115,8 @@ namespace Finalv2
                 armRotation = maxRotation;
             }
 
+            if (aiActivated)
+                return;
             //return to orginal pos
             if (!keyboardState.IsKeyDown(Keys.Left) && !keyboardState.IsKeyDown(Keys.Right) & !(keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space)))
             {
