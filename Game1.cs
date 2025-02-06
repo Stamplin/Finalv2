@@ -9,6 +9,9 @@ namespace Finalv2
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+
+        //random number gen
+
         //import texture
         Texture2D backgroundTexture, tempArm;
         //game variables
@@ -24,6 +27,10 @@ namespace Finalv2
 
         bool aiActivated = false;
         bool isFrozen = false;
+        int gameWinStatus = 0;
+        //0 = nothing
+        //1 = win
+        //2 = loss
 
         public Game1()
         {
@@ -69,6 +76,7 @@ namespace Finalv2
                 armRotation = 0.4f;
                 isFrozen = false;
                 aiActivated = false;
+                gameWinStatus = 0;
             }
 
             if (isFrozen)
@@ -109,10 +117,12 @@ namespace Finalv2
             {
                 armRotation = minRotation;
                 isFrozen = true;
+                gameWinStatus = 1;
             }
             else if (armRotation >= maxRotation)
             {
                 armRotation = maxRotation;
+                gameWinStatus = 2;
             }
 
             if (aiActivated)
