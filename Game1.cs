@@ -15,18 +15,18 @@ namespace Finalv2
         Texture2D backgroundTexture, tempArm;
         //game variables
         float armRotation = 0.1f; //so the cool animation play and get it shaky
-        float aiPushForce = 0f; //ai strength
+        float aiPushForce = 2f; //ai strength
 
         KeyboardState keyboardState, prevKeyboardState;
 
-        const float minRotation = -0.3f; //left
-        const float maxRotation = 1.3f;  //right
+        const float minRotation = -0.39f; //left
+        const float maxRotation = 1.5f;  //right
         const float returnSpeed = 0.01f;  //speed at which the arm resets
-        const float moveStep = 0.09f; //spacebar power
+        const float moveStep = 0.07f; //spacebar power
 
         bool aiActivated = false;
         bool isFrozen = false;
-        int gameWinStatus = 0;
+        int gameWinStatus = 0;    
         //0 = nothing
         //1 = win
         //2 = loss
@@ -50,7 +50,7 @@ namespace Finalv2
             _graphics.PreferredBackBufferHeight = 720;
             _graphics.PreferredBackBufferWidth = 1280;
             _graphics.ApplyChanges();
-            aiPushForce = rnd.Next(1, 5) * 0.01f; //base stat when game starts
+            //aiPushForce = rnd.Next(1, 4) * 0.01f; //base stat when game starts
 
             base.Initialize();
         }
@@ -85,6 +85,7 @@ namespace Finalv2
 {
                 aiPushForceADD = rnd.Next(-3, 3) * 0.01f;
                 aiPushForce += aiPushForceADD;
+                //dont work
             }
 
             //reset - rematch
@@ -94,7 +95,7 @@ namespace Finalv2
                 isFrozen = false;  
                 aiActivated = false;
                 gameWinStatus = 0;
-                aiPushForce = rnd.Next(1, 5) * 0.01f; //ai base stat reset every rematch
+                aiPushForce = rnd.Next(1, 4) * 0.01f; //ai base stat reset every rematch
             }
             //if winstat 2 then it freezes
             if (gameWinStatus == 2)
@@ -175,7 +176,7 @@ namespace Finalv2
             _spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1280, 720), Color.White);
 
             //draw arm and spin/roate it based on the armRotation variable
-            _spriteBatch.Draw(tempArm, new Vector2(700, 570), null, Color.White, armRotation, new Vector2(tempArm.Width / 2, tempArm.Height / 2), 1.0f, SpriteEffects.None, 0f);
+            _spriteBatch.Draw(tempArm, new Vector2(700, 730), null, Color.White, armRotation, new Vector2(455, 505), 1.0f, SpriteEffects.None, 0f);
 
             _spriteBatch.End();
 
