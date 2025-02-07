@@ -15,7 +15,7 @@ namespace Finalv2
         Texture2D backgroundTexture, tempArm;
         //game variables
         float armRotation = 0.1f; //so the cool animation play and get it shaky
-        float aiPushForce = 0.02f; //ai strength
+        float aiPushForce = 0f; //ai strength
 
         KeyboardState keyboardState, prevKeyboardState;
 
@@ -30,6 +30,8 @@ namespace Finalv2
         //0 = nothing
         //1 = win
         //2 = loss
+
+        float aiPushForceADD = 0f;
 
         //random number generator
         Random rnd = new Random();
@@ -48,7 +50,7 @@ namespace Finalv2
             _graphics.PreferredBackBufferHeight = 720;
             _graphics.PreferredBackBufferWidth = 1280;
             _graphics.ApplyChanges();
-
+            aiPushForce = rnd.Next(1, 5) * 0.01f; //base stat when game starts
 
             base.Initialize();
         }
@@ -73,13 +75,26 @@ namespace Finalv2
 
             // TODO: Add your update logic here
 
+            //make winodow title show the aipushforce varible
+            //TEST PURPOSE
+            Window.Title = aiPushForce.ToString();
+
+            //every second add +/- to the ai base stats
+            //NOT WORKING
+            if (gameTime.TotalGameTime.TotalSeconds % 1 == 0)
+{
+                aiPushForceADD = rnd.Next(-3, 3) * 0.01f;
+                aiPushForce += aiPushForceADD;
+            }
+
             //reset
-            if (keyboardState.IsKeyDown(Keys.R))
+            if (keyboardState.IsKeyDown(Keys.R) && prevKeyboardState.IsKeyUp(Keys.R))
             {
                 armRotation = 0.4f;
-                isFrozen = false;
+                isFrozen = false;  
                 aiActivated = false;
                 gameWinStatus = 0;
+                aiPushForce = rnd.Next(1, 5) * 0.01f; //ai based stats
             }
             //if winstat 2 then it freezes
             if (gameWinStatus == 2)
