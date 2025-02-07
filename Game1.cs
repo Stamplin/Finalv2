@@ -87,14 +87,14 @@ namespace Finalv2
                 aiPushForce += aiPushForceADD;
             }
 
-            //reset
+            //reset - rematch
             if (keyboardState.IsKeyDown(Keys.R) && prevKeyboardState.IsKeyUp(Keys.R))
             {
                 armRotation = 0.4f;
                 isFrozen = false;  
                 aiActivated = false;
                 gameWinStatus = 0;
-                aiPushForce = rnd.Next(1, 5) * 0.01f; //ai based stats
+                aiPushForce = rnd.Next(1, 5) * 0.01f; //ai base stat reset every rematch
             }
             //if winstat 2 then it freezes
             if (gameWinStatus == 2)
