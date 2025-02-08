@@ -38,6 +38,14 @@ namespace Finalv2
 
         //random number generator
         Random rnd = new Random();
+
+        //visuals player stuff
+        int angerLevel = 1;
+        //1 = scared
+        //2 = weak
+        //3 = normal
+        //4 = angry
+        //5 = very angry
        
 
         public Game1()
@@ -80,7 +88,7 @@ namespace Finalv2
 
             //make winodow title show the aipushforce varible
             //TEST PURPOSE
-            Window.Title = aiPushForce.ToString();
+            Window.Title = $"AI Push: {aiPushForce:F4} | Anger Level: {angerLevel}";
 
             //every second add +/- to the ai base stats
             aiPushForceTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -90,6 +98,19 @@ namespace Finalv2
                 aiPushForce = Math.Clamp(aiPushForce + aiPushForceADD, 0.01f, 0.05f);
                 aiPushForceTimer = 0f;
             }
+
+            //anger level for visual
+            if (aiPushForce <= 0.011f)
+                angerLevel = 1; // Scared (Weak AI)
+            else if (aiPushForce <= 0.017f)
+                angerLevel = 2; 
+            else if (aiPushForce <= 0.023f)
+                angerLevel = 3; 
+            else if (aiPushForce <= 0.029f)
+                angerLevel = 4; 
+            else
+                angerLevel = 5; // Angry (Strong AI)
+
 
             //reset - rematch
             if (keyboardState.IsKeyDown(Keys.R) && prevKeyboardState.IsKeyUp(Keys.R))
