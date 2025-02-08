@@ -22,7 +22,7 @@ namespace Finalv2
         const float minRotation = -0.39f; //left
         const float maxRotation = 1.5f;  //right
         const float returnSpeed = 0.01f;  //speed at which the arm resets
-        const float moveStep = 0.07f; //spacebar power
+        const float moveStep = 0.09f; //spacebar power
 
         bool aiActivated = false;
         bool isFrozen = false;
@@ -31,7 +31,10 @@ namespace Finalv2
         //1 = win
         //2 = loss
 
+        //better ai
         float aiPushForceADD = 0f;
+        float aiPushForceTimer = 0f;
+        const float aiPushInterval = 1f; //AI push force every whatever seconds
 
         //random number generator
         Random rnd = new Random();
@@ -80,12 +83,12 @@ namespace Finalv2
             Window.Title = aiPushForce.ToString();
 
             //every second add +/- to the ai base stats
-            //NOT WORKING
-            if (gameTime.TotalGameTime.TotalSeconds % 1 == 0)
-{
-                aiPushForceADD = rnd.Next(-3, 3) * 0.01f;
-                aiPushForce += aiPushForceADD;
-                //dont work
+            aiPushForceTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (aiPushForceTimer >= aiPushInterval)
+            {
+                aiPushForceADD = rnd.Next(-1, 2) * 0.001f;
+                aiPushForce = Math.Clamp(aiPushForce + aiPushForceADD, 0.01f, 0.05f);
+                aiPushForceTimer = 0f;
             }
 
             //reset - rematch
