@@ -22,7 +22,7 @@ namespace Finalv2
         const float minRotation = -0.39f; //left
         const float maxRotation = 1.5f;  //right
         const float returnSpeed = 0.01f;  //speed at which the arm resets
-        const float moveStep = 0.09f; //spacebar power
+        const float moveStep = 0.10f; //spacebar power
 
         bool aiActivated = false;
         bool isFrozen = false;
