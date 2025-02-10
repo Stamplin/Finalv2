@@ -22,7 +22,7 @@ namespace Finalv2
         const float minRotation = -0.39f; //left
         const float maxRotation = 1.5f;  //right
         const float returnSpeed = 0.01f;  //speed at which the arm resets
-        const float moveStep = 0.07f; //spacebar power
+        const float moveStep = 0.10f; //spacebar power
 
         bool aiActivated = false;
         bool isFrozen = false;
@@ -31,11 +31,19 @@ namespace Finalv2
         //1 = win
         //2 = loss
 
+        //better ai
         float aiPushForceADD = 0f;
-        float seconds;
 
         //random number generator
         Random rnd = new Random();
+
+        //visuals player stuff
+        int angerLevel = 1;
+        //1 = scared
+        //2 = weak
+        //3 = normal
+        //4 = angry
+        //5 = very angry
        
 
         public Game1()
@@ -82,20 +90,28 @@ namespace Finalv2
             // TODO: Add your update logic here
             //make winodow title show the aipushforce varible
             //TEST PURPOSE
-            Window.Title = aiPushForce.ToString();
+            Window.Title = $"AI Push: {aiPushForce:F4} | Anger Level: {angerLevel}";
 
-
-            //every second a number is generated and added to aiPushForce
-
-            //DO LATERRRRR
-            if (seconds % 1 != 0)
-            {
-                aiPushForceADD = rnd.Next(-1, 1) * 0.01f;
+            //every second add +/- to the ai base stats
+            //NOT WORKING
+            if (gameTime.TotalGameTime.TotalSeconds % 1 == 0)
+{
+                aiPushForceADD = rnd.Next(-3, 3) * 0.01f;
+                aiPushForce += aiPushForceADD;
+                //dont work
             }
-            aiPushForce += aiPushForceADD;
-            aiPushForceADD = 0f;
 
-
+            //anger level for visual
+            if (aiPushForce <= 0.011f)
+                angerLevel = 1; // Scared (Weak AI)
+            else if (aiPushForce <= 0.017f)
+                angerLevel = 2; 
+            else if (aiPushForce <= 0.023f)
+                angerLevel = 3; 
+            else if (aiPushForce <= 0.029f)
+                angerLevel = 4; 
+            else
+                angerLevel = 5; // Angry (Strong AI)
 
 
             //reset - rematch
