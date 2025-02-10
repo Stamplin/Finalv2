@@ -14,7 +14,7 @@ namespace Finalv2
         //import texture
         Texture2D backgroundTexture, tempArm;
         //game variables
-        float armRotation = 0.1f; //so the cool animation play and get it shaky
+        float armRotation = 0.1f; //so the cool animation play and get it shakey
         float aiPushForce = 2f; //ai strength
 
         KeyboardState keyboardState, prevKeyboardState;
@@ -32,6 +32,7 @@ namespace Finalv2
         //2 = loss
 
         float aiPushForceADD = 0f;
+        float seconds;
 
         //random number generator
         Random rnd = new Random();
@@ -50,6 +51,9 @@ namespace Finalv2
             _graphics.PreferredBackBufferHeight = 720;
             _graphics.PreferredBackBufferWidth = 1280;
             _graphics.ApplyChanges();
+
+            seconds = 0f;
+
             //aiPushForce = rnd.Next(1, 4) * 0.01f; //base stat when game starts
 
             base.Initialize();
@@ -70,23 +74,29 @@ namespace Finalv2
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            seconds += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             prevKeyboardState = keyboardState;
             keyboardState = Keyboard.GetState();
 
             // TODO: Add your update logic here
-
             //make winodow title show the aipushforce varible
             //TEST PURPOSE
             Window.Title = aiPushForce.ToString();
 
-            //every second add +/- to the ai base stats
-            //NOT WORKING
-            if (gameTime.TotalGameTime.TotalSeconds % 1 == 0)
-{
-                aiPushForceADD = rnd.Next(-3, 3) * 0.01f;
-                aiPushForce += aiPushForceADD;
-                //dont work
+
+            //every second a number is generated and added to aiPushForce
+
+            //DO LATERRRRR
+            if (seconds % 1 != 0)
+            {
+                aiPushForceADD = rnd.Next(-1, 1) * 0.01f;
             }
+            aiPushForce += aiPushForceADD;
+            aiPushForceADD = 0f;
+
+
+
 
             //reset - rematch
             if (keyboardState.IsKeyDown(Keys.R) && prevKeyboardState.IsKeyUp(Keys.R))
