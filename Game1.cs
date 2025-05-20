@@ -11,10 +11,14 @@ namespace Finalv2
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        MouseState _mouseState;
+        KeyboardState _keyboardState;
+
+        #region arm wrestling
         //import texture
         Texture2D backgroundTexture, tempArm;
         //game variables
-        float armRotation = 0.1f; //so the cool animation play and get it shakey
+        float armRotation = 0.1f; //so the cool animation play and get it shaky
         float aiPushForce = 2f; //ai strength
 
         KeyboardState keyboardState, prevKeyboardState;
@@ -26,13 +30,15 @@ namespace Finalv2
 
         bool aiActivated = false;
         bool isFrozen = false;
-        int gameWinStatus = 0;    
+        int gameWinStatus = 0;
         //0 = nothing
         //1 = win
         //2 = loss
 
         //better ai
         float aiPushForceADD = 0f;
+        float aiPushForceTimer = 0f;
+        const float aiPushInterval = 1f; //AI push force every whatever seconds
 
         //random number generator
         Random rnd = new Random();
@@ -44,7 +50,14 @@ namespace Finalv2
         //3 = normal
         //4 = angry
         //5 = very angry
+        #endregion
+
+        #region shootingDuel
+        //shootingDuel variables
+
        
+        #endregion
+
 
         public Game1()
         {
@@ -59,10 +72,7 @@ namespace Finalv2
             _graphics.PreferredBackBufferHeight = 720;
             _graphics.PreferredBackBufferWidth = 1280;
             _graphics.ApplyChanges();
-
-            seconds = 0f;
-
-            //aiPushForce = rnd.Next(1, 4) * 0.01f; //base stat when game starts
+            aiPushForce = rnd.Next(1, 4) * 0.01f; //base stat when game starts
 
             base.Initialize();
         }
@@ -82,34 +92,57 @@ namespace Finalv2
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            seconds += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
             prevKeyboardState = keyboardState;
             keyboardState = Keyboard.GetState();
 
             // TODO: Add your update logic here
+
             //make winodow title show the aipushforce varible
             //TEST PURPOSE
             Window.Title = $"AI Push: {aiPushForce:F4} | Anger Level: {angerLevel}";
+            aiPushForceTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            armWrestlingLogic();
+
+
+            base.Update(gameTime);
+        }
+
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            // TODO: Add your drawing code here
+            _spriteBatch.Begin();
+
+            armWrestlingDraw();
+
+            _spriteBatch.End();
+
+
+            base.Draw(gameTime);
+        }
+
+        //arm wrestling minigame logic
+        private void armWrestlingLogic()
+        {
             //every second add +/- to the ai base stats
-            //NOT WORKING
-            if (gameTime.TotalGameTime.TotalSeconds % 1 == 0)
-{
-                aiPushForceADD = rnd.Next(-3, 3) * 0.01f;
-                aiPushForce += aiPushForceADD;
-                //dont work
+            if (aiPushForceTimer >= aiPushInterval)
+            {
+                aiPushForceADD = rnd.Next(-1, 2) * 0.001f;
+                aiPushForce = Math.Clamp(aiPushForce + aiPushForceADD, 0.01f, 0.05f);
+                aiPushForceTimer = 0f;
             }
 
             //anger level for visual
             if (aiPushForce <= 0.011f)
                 angerLevel = 1; // Scared (Weak AI)
             else if (aiPushForce <= 0.017f)
-                angerLevel = 2; 
+                angerLevel = 2;
             else if (aiPushForce <= 0.023f)
-                angerLevel = 3; 
+                angerLevel = 3;
             else if (aiPushForce <= 0.029f)
-                angerLevel = 4; 
+                angerLevel = 4;
             else
                 angerLevel = 5; // Angry (Strong AI)
 
@@ -118,7 +151,7 @@ namespace Finalv2
             if (keyboardState.IsKeyDown(Keys.R) && prevKeyboardState.IsKeyUp(Keys.R))
             {
                 armRotation = 0.4f;
-                isFrozen = false;  
+                isFrozen = false;
                 aiActivated = false;
                 gameWinStatus = 0;
                 aiPushForce = rnd.Next(1, 4) * 0.01f; //ai base stat reset every rematch
@@ -135,8 +168,8 @@ namespace Finalv2
             //play need to press space
             if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
             {
-                armRotation -= moveStep; 
-                aiActivated = true;  
+                armRotation -= moveStep;
+                aiActivated = true;
             }
             //start only when the player is ready
             if (aiActivated && armRotation < maxRotation)
@@ -175,6 +208,13 @@ namespace Finalv2
                 gameWinStatus = 2;
             }
 
+            //taunt the ai to break it, make it weaker by pressing e
+            if (keyboardState.IsKeyDown(Keys.E) && prevKeyboardState.IsKeyUp(Keys.E))
+            {
+                aiPushForce = Math.Clamp(aiPushForce - 0.001f, 0.01f, 0.05f);
+
+            }
+
             if (aiActivated)
                 return;
             //return to orginal pos
@@ -186,28 +226,19 @@ namespace Finalv2
                 }
                 else if (armRotation < 0.4f)
                 {
-                    armRotation += ((returnSpeed)/2);
+                    armRotation += ((returnSpeed) / 2);
                 }
             }
-
-            base.Update(gameTime);
         }
 
-        protected override void Draw(GameTime gameTime)
-        {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
-            _spriteBatch.Begin();
+        //arm wrestling minigame draw
+        private void armWrestlingDraw()
+        {
             _spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1280, 720), Color.White);
 
             //draw arm and spin/roate it based on the armRotation variable
             _spriteBatch.Draw(tempArm, new Vector2(700, 730), null, Color.White, armRotation, new Vector2(455, 505), 1.0f, SpriteEffects.None, 0f);
-
-            _spriteBatch.End();
-
-
-            base.Draw(gameTime);
         }
     }
 }
