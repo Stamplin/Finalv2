@@ -14,6 +14,37 @@ namespace Finalv2
         MouseState _mouseState;
         KeyboardState _keyboardState;
 
+        //random number generator
+        Random rnd = new Random();
+
+        #region drinking game
+        //drink variables
+
+        //var for combo using number gen
+        int comboGen;
+
+        //combo varible 
+        int comboOne;
+        int comboTwo;
+        int comboThree;
+
+        //combo input
+        int inputOne;
+        int inputTwo;
+        int inputThree;
+
+
+        //bools
+        bool drinkingGameComplete = false;
+
+        bool inputOneComplete = false;
+        bool inputTwoComplete = false;
+        bool inputThreeComplete = false;
+
+
+
+        #endregion
+
         #region arm wrestling
         //import texture
         Texture2D backgroundTexture, tempArm;
@@ -40,9 +71,6 @@ namespace Finalv2
         float aiPushForceTimer = 0f;
         const float aiPushInterval = 1f; //AI push force every whatever seconds
 
-        //random number generator
-        Random rnd = new Random();
-
         //visuals player stuff
         int angerLevel = 1;
         //1 = scared
@@ -57,6 +85,8 @@ namespace Finalv2
 
        
         #endregion
+
+
 
 
         public Game1()
@@ -99,10 +129,180 @@ namespace Finalv2
 
             //make winodow title show the aipushforce varible
             //TEST PURPOSE
-            Window.Title = $"AI Push: {aiPushForce:F4} | Anger Level: {angerLevel}";
-            aiPushForceTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //Window.Title = $"AI Push: {aiPushForce:F4} | Anger Level: {angerLevel}";
 
-            armWrestlingLogic();
+
+
+            #region drinking game
+
+            //run once
+            if (comboOne == 0)
+            {
+                comboOne = rnd.Next(1, 5);
+                comboTwo = rnd.Next(1, 5);
+                comboThree = rnd.Next(1, 5);
+            }
+
+            //combo generator (dont forget to move this to initialize)
+            //for (int i = 0; i < 3; i++)
+            //{
+            //    comboGen = rnd.Next(1, 5);
+            //    switch (i)
+            //    {
+            //        case 0: comboOne = comboGen; break;
+            //        case 1: comboTwo = comboGen; break;
+            //        case 2: comboThree = comboGen; break;
+            //    }
+            //}
+
+            //display the numbers on the screen 
+            Window.Title = $"Combo One: {comboOne} | Combo Two: {comboTwo} | Combo Three: {comboThree}";
+
+            //arrows = num
+            //up = 1
+            //down = 2
+            //left = 3
+            //right = 4
+
+            
+
+            //if input one is not complete
+            if (drinkingGameComplete == false)
+            {
+
+                if  (inputOneComplete == false)
+                {
+
+                    //if input is not combo one
+                    if (inputOne != comboOne)
+                    {
+                        //check if arrows are pressed
+                        if (keyboardState.IsKeyDown(Keys.Up))
+                        {
+                            inputOne = 1;
+                        }
+                        else if (keyboardState.IsKeyDown(Keys.Down))
+                        {
+                            inputOne = 2;
+                        }
+                        else if (keyboardState.IsKeyDown(Keys.Left))
+                        {
+                            inputOne = 3;
+                        }
+                        else if (keyboardState.IsKeyDown(Keys.Right))
+                        {
+                            inputOne = 4;
+                        }
+                    }
+
+                    //then if input = combo one
+                    else if (inputOne == comboOne)
+                    {
+                        Window.Title = $"Combo One: Completed | Combo Two: {comboTwo} | Combo Three: {comboThree}";
+                        bool inputOneComplete = true;
+                    }
+                }
+
+                //if input one is complete and input two is not complete
+                if (inputOneComplete == true && inputTwoComplete == false)
+                {
+                    //check if arrows are pressed
+                    if (keyboardState.IsKeyDown(Keys.Up))
+                    {
+                        inputTwo = 1;
+                    }
+                    else if (keyboardState.IsKeyDown(Keys.Down))
+                    {
+                        inputTwo = 2;
+                    }
+                    else if (keyboardState.IsKeyDown(Keys.Left))
+                    {
+                        inputTwo = 3;
+                    }
+                    else if (keyboardState.IsKeyDown(Keys.Right))
+                    {
+                        inputTwo = 4;
+                    }
+
+                    //then if input = combo two
+                    else if (inputTwo == comboTwo)
+                    {
+                        Window.Title = $"Combo One: Completed | Combo Two: Completed | Combo Three: {comboThree}";
+                        bool inputTwoComplete = true;
+                    }
+                }
+
+                //if input one and two are complete and input three is not complete
+                if (inputOneComplete == true && inputTwoComplete == true && inputThreeComplete == false)
+                {
+                    //check if arrows are pressed
+                    if (keyboardState.IsKeyDown(Keys.Up))
+                    {
+                        inputThree = 1;
+                    }
+                    else if (keyboardState.IsKeyDown(Keys.Down))
+                    {
+                        inputThree = 2;
+                    }
+                    else if (keyboardState.IsKeyDown(Keys.Left))
+                    {
+                        inputThree = 3;
+                    }
+                    else if (keyboardState.IsKeyDown(Keys.Right))
+                    {
+                        inputThree = 4;
+                    }
+
+                    //then if input = combo three
+                    else if (inputThree == comboThree)
+                    {
+                        Window.Title = $"Combo One: Completed | Combo Two: Completed | Combo Three: Completed";
+                        bool drinkingGameComplete = true;
+                    }
+                
+                    
+                }
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            #endregion
+
+
+
+
+
+
+
+
+
+            //aiPushForceTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            //armWrestlingLogic();
 
 
             base.Update(gameTime);
