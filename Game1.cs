@@ -79,8 +79,13 @@ namespace Finalv2
         //5 = very angry
         #endregion
 
-        #region shootingDuel
+        #region boxing game
         //shootingDuel variables
+
+        //bools
+        bool shootingDuelComplete = false;
+
+        //movement
 
        
         #endregion
@@ -110,8 +115,16 @@ namespace Finalv2
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            backgroundTexture = Content.Load<Texture2D>("Background");
-            tempArm = Content.Load<Texture2D>("Arm");
+            //armwrestling
+            backgroundTexture = Content.Load<Texture2D>("Arm/Background");
+            tempArm = Content.Load<Texture2D>("Arm/Arm");
+
+            //drinking game
+
+            // will add later
+
+            //boxing game
+
 
             // TODO: use this.Content to load your game content here
         }
@@ -130,116 +143,7 @@ namespace Finalv2
             //TEST PURPOSE
             //Window.Title = $"AI Push: {aiPushForce:F4} | Anger Level: {angerLevel}";
 
-
-
-            #region drinking game
-
-            //keyboard press frame
-            int keyPressedThisFrame = 0;
-
-            //run once
-            if (comboOne == 0)
-            {
-                comboOne = rnd.Next(1, 5); 
-                comboTwo = rnd.Next(1, 5);
-                comboThree = rnd.Next(1, 5);
-
-                //reset 
-                inputOne = 0; 
-                inputTwo = 0;
-                inputThree = 0;
-
-                inputOneComplete = false;
-                inputTwoComplete = false;
-                inputThreeComplete = false;
-                drinkingGameComplete = false;
-            }
-
-            //check for a single key press this frame
-            if (keyboardState.IsKeyDown(Keys.Up) && prevKeyboardState.IsKeyUp(Keys.Up)) keyPressedThisFrame = 1;
-            else if (keyboardState.IsKeyDown(Keys.Down) && prevKeyboardState.IsKeyUp(Keys.Down)) keyPressedThisFrame = 2;
-            else if (keyboardState.IsKeyDown(Keys.Left) && prevKeyboardState.IsKeyUp(Keys.Left)) keyPressedThisFrame = 3;
-            else if (keyboardState.IsKeyDown(Keys.Right) && prevKeyboardState.IsKeyUp(Keys.Right)) keyPressedThisFrame = 4;
-
-            //check input if the current combo isn't complete and a key was pressed
-            if (!drinkingGameComplete && keyPressedThisFrame != 0)
-            {
-                if (!inputOneComplete) 
-                {
-                    if (keyPressedThisFrame == comboOne)
-                    {
-                        inputOne = keyPressedThisFrame;
-                        inputOneComplete = true;       
-                    }
-                    //else if wrong first key, player just has to try again...idk what to put yet
-                }
-                else if (!inputTwoComplete) //first key done wait for the second
-                {
-                    if (keyPressedThisFrame == comboTwo)
-                    {
-                        inputTwo = keyPressedThisFrame; 
-                        inputTwoComplete = true;        
-                    }
-                    else //mistake on the second key
-                    {
-                        //reset progress for THIS combo
-                        inputOneComplete = false;
-                        inputOne = 0; 
-                        
-                    }
-                }
-                else if (!inputThreeComplete) //waiting for the third
-                {
-                    if (keyPressedThisFrame == comboThree)
-                    {
-                        inputThree = keyPressedThisFrame; 
-                        inputThreeComplete = true;      
-                        drinkingGameComplete = true;  
-                    }
-                    else //mistake on the third key
-                    {
-                        //reset progress for THIS combo
-                        inputOneComplete = false;
-                        inputTwoComplete = false;
-                        inputOne = 0; 
-                        inputTwo = 0; 
-                        
-                    }
-                }
-            }
-
-            //display game status on the window title
-            string displayMessage;
-            string targetComboStr = $"{KeyToArrow(comboOne)} {KeyToArrow(comboTwo)} {KeyToArrow(comboThree)}";
-            string playerAttemptStr = "";
-
-
-            //just spacing for looks
-            if (inputOneComplete) playerAttemptStr += KeyToArrow(inputOne); else playerAttemptStr += "_";
-            playerAttemptStr += " "; 
-            if (inputTwoComplete) playerAttemptStr += KeyToArrow(inputTwo); else playerAttemptStr += "_";
-            playerAttemptStr += " ";
-            if (inputThreeComplete) playerAttemptStr += KeyToArrow(inputThree); else playerAttemptStr += "_"; 
-
-
-            //title for now will remove later
-            if (drinkingGameComplete)
-            {
-                displayMessage = $"COMBO! {playerAttemptStr} - Press 'N' for next.";
-                if (keyboardState.IsKeyDown(Keys.N) && prevKeyboardState.IsKeyUp(Keys.N)) //new combo generation and reset everything
-                {
-                    comboOne = 0; 
-                }
-            }
-            else
-            {
-                displayMessage = $"Target: {targetComboStr} | You: {playerAttemptStr}";
-            }
-            Window.Title = displayMessage;
-
-            #endregion
-
-
+            drinkingGameLogic();
 
 
 
@@ -386,6 +290,114 @@ namespace Finalv2
             //draw arm and spin/roate it based on the armRotation variable
             _spriteBatch.Draw(tempArm, new Vector2(700, 730), null, Color.White, armRotation, new Vector2(455, 505), 1.0f, SpriteEffects.None, 0f);
         }
+
+        private void drinkingGameLogic()
+        {
+
+            //keyboard press frame
+            int keyPressedThisFrame = 0;
+
+            //run once
+            if (comboOne == 0)
+            {
+                comboOne = rnd.Next(1, 5);
+                comboTwo = rnd.Next(1, 5);
+                comboThree = rnd.Next(1, 5);
+
+                //reset 
+                inputOne = 0;
+                inputTwo = 0;
+                inputThree = 0;
+
+                inputOneComplete = false;
+                inputTwoComplete = false;
+                inputThreeComplete = false;
+                drinkingGameComplete = false;
+            }
+
+            //check for a single key press this frame
+            if (keyboardState.IsKeyDown(Keys.Up) && prevKeyboardState.IsKeyUp(Keys.Up)) keyPressedThisFrame = 1;
+            else if (keyboardState.IsKeyDown(Keys.Down) && prevKeyboardState.IsKeyUp(Keys.Down)) keyPressedThisFrame = 2;
+            else if (keyboardState.IsKeyDown(Keys.Left) && prevKeyboardState.IsKeyUp(Keys.Left)) keyPressedThisFrame = 3;
+            else if (keyboardState.IsKeyDown(Keys.Right) && prevKeyboardState.IsKeyUp(Keys.Right)) keyPressedThisFrame = 4;
+
+            //check input if the current combo isn't complete and a key was pressed
+            if (!drinkingGameComplete && keyPressedThisFrame != 0)
+            {
+                if (!inputOneComplete)
+                {
+                    if (keyPressedThisFrame == comboOne)
+                    {
+                        inputOne = keyPressedThisFrame;
+                        inputOneComplete = true;
+                    }
+                    //else if wrong first key, player just has to try again...idk what to put yet
+                }
+                else if (!inputTwoComplete) //first key done wait for the second
+                {
+                    if (keyPressedThisFrame == comboTwo)
+                    {
+                        inputTwo = keyPressedThisFrame;
+                        inputTwoComplete = true;
+                    }
+                    else //mistake on the second key
+                    {
+                        //reset progress for THIS combo
+                        inputOneComplete = false;
+                        inputOne = 0;
+
+                    }
+                }
+                else if (!inputThreeComplete) //waiting for the third
+                {
+                    if (keyPressedThisFrame == comboThree)
+                    {
+                        inputThree = keyPressedThisFrame;
+                        inputThreeComplete = true;
+                        drinkingGameComplete = true;
+                    }
+                    else //mistake on the third key
+                    {
+                        //reset progress for THIS combo
+                        inputOneComplete = false;
+                        inputTwoComplete = false;
+                        inputOne = 0;
+                        inputTwo = 0;
+
+                    }
+                }
+            }
+
+            //display game status on the window title
+            string displayMessage;
+            string targetComboStr = $"{KeyToArrow(comboOne)} {KeyToArrow(comboTwo)} {KeyToArrow(comboThree)}";
+            string playerAttemptStr = "";
+
+
+            //just spacing for looks
+            if (inputOneComplete) playerAttemptStr += KeyToArrow(inputOne); else playerAttemptStr += "_";
+            playerAttemptStr += " ";
+            if (inputTwoComplete) playerAttemptStr += KeyToArrow(inputTwo); else playerAttemptStr += "_";
+            playerAttemptStr += " ";
+            if (inputThreeComplete) playerAttemptStr += KeyToArrow(inputThree); else playerAttemptStr += "_";
+
+
+            //title for now will remove later
+            if (drinkingGameComplete)
+            {
+                displayMessage = $"COMBO! {playerAttemptStr} - Press 'N' for next.";
+                if (keyboardState.IsKeyDown(Keys.N) && prevKeyboardState.IsKeyUp(Keys.N)) //new combo generation and reset everything
+                {
+                    comboOne = 0;
+                }
+            }
+            else
+            {
+                displayMessage = $"Target: {targetComboStr} | You: {playerAttemptStr}";
+            }
+            Window.Title = displayMessage;
+        }
+
 
 
         //arrow key conversion for UI for now will switch later
