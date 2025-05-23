@@ -20,9 +20,6 @@ namespace Finalv2
         #region drinking game
         //drink variables
 
-        //var for combo using number gen
-        int comboGen;
-
         //combo varible 
         int comboOne;
         int comboTwo;
@@ -40,6 +37,8 @@ namespace Finalv2
         bool inputOneComplete = false;
         bool inputTwoComplete = false;
         bool inputThreeComplete = false;
+
+        
 
 
 
@@ -135,161 +134,108 @@ namespace Finalv2
 
             #region drinking game
 
+            //keyboard press frame
+            int keyPressedThisFrame = 0;
+
             //run once
             if (comboOne == 0)
             {
-                comboOne = rnd.Next(1, 5);
+                comboOne = rnd.Next(1, 5); 
                 comboTwo = rnd.Next(1, 5);
                 comboThree = rnd.Next(1, 5);
+
+                //reset 
+                inputOne = 0; 
+                inputTwo = 0;
+                inputThree = 0;
+
+                inputOneComplete = false;
+                inputTwoComplete = false;
+                inputThreeComplete = false;
+                drinkingGameComplete = false;
             }
 
-            //combo generator (dont forget to move this to initialize)
-            //for (int i = 0; i < 3; i++)
-            //{
-            //    comboGen = rnd.Next(1, 5);
-            //    switch (i)
-            //    {
-            //        case 0: comboOne = comboGen; break;
-            //        case 1: comboTwo = comboGen; break;
-            //        case 2: comboThree = comboGen; break;
-            //    }
-            //}
+            //check for a single key press this frame
+            if (keyboardState.IsKeyDown(Keys.Up) && prevKeyboardState.IsKeyUp(Keys.Up)) keyPressedThisFrame = 1;
+            else if (keyboardState.IsKeyDown(Keys.Down) && prevKeyboardState.IsKeyUp(Keys.Down)) keyPressedThisFrame = 2;
+            else if (keyboardState.IsKeyDown(Keys.Left) && prevKeyboardState.IsKeyUp(Keys.Left)) keyPressedThisFrame = 3;
+            else if (keyboardState.IsKeyDown(Keys.Right) && prevKeyboardState.IsKeyUp(Keys.Right)) keyPressedThisFrame = 4;
 
-            //display the numbers on the screen 
-            Window.Title = $"Combo One: {comboOne} | Combo Two: {comboTwo} | Combo Three: {comboThree}";
-
-            //arrows = num
-            //up = 1
-            //down = 2
-            //left = 3
-            //right = 4
-
-            
-
-            //if input one is not complete
-            if (drinkingGameComplete == false)
+            //check input if the current combo isn't complete and a key was pressed
+            if (!drinkingGameComplete && keyPressedThisFrame != 0)
             {
-
-                if  (inputOneComplete == false)
+                if (!inputOneComplete) 
                 {
-
-                    //if input is not combo one
-                    if (inputOne != comboOne)
+                    if (keyPressedThisFrame == comboOne)
                     {
-                        //check if arrows are pressed
-                        if (keyboardState.IsKeyDown(Keys.Up))
-                        {
-                            inputOne = 1;
-                        }
-                        else if (keyboardState.IsKeyDown(Keys.Down))
-                        {
-                            inputOne = 2;
-                        }
-                        else if (keyboardState.IsKeyDown(Keys.Left))
-                        {
-                            inputOne = 3;
-                        }
-                        else if (keyboardState.IsKeyDown(Keys.Right))
-                        {
-                            inputOne = 4;
-                        }
+                        inputOne = keyPressedThisFrame;
+                        inputOneComplete = true;       
                     }
-
-                    //then if input = combo one
-                    else if (inputOne == comboOne)
+                    //else if wrong first key, player just has to try again...idk what to put yet
+                }
+                else if (!inputTwoComplete) //first key done wait for the second
+                {
+                    if (keyPressedThisFrame == comboTwo)
                     {
-                        Window.Title = $"Combo One: Completed | Combo Two: {comboTwo} | Combo Three: {comboThree}";
-                        bool inputOneComplete = true;
+                        inputTwo = keyPressedThisFrame; 
+                        inputTwoComplete = true;        
+                    }
+                    else //mistake on the second key
+                    {
+                        //reset progress for THIS combo
+                        inputOneComplete = false;
+                        inputOne = 0; 
+                        
                     }
                 }
-
-                //if input one is complete and input two is not complete
-                if (inputOneComplete == true && inputTwoComplete == false)
+                else if (!inputThreeComplete) //waiting for the third
                 {
-                    //check if arrows are pressed
-                    if (keyboardState.IsKeyDown(Keys.Up))
+                    if (keyPressedThisFrame == comboThree)
                     {
-                        inputTwo = 1;
+                        inputThree = keyPressedThisFrame; 
+                        inputThreeComplete = true;      
+                        drinkingGameComplete = true;  
                     }
-                    else if (keyboardState.IsKeyDown(Keys.Down))
+                    else //mistake on the third key
                     {
-                        inputTwo = 2;
-                    }
-                    else if (keyboardState.IsKeyDown(Keys.Left))
-                    {
-                        inputTwo = 3;
-                    }
-                    else if (keyboardState.IsKeyDown(Keys.Right))
-                    {
-                        inputTwo = 4;
-                    }
-
-                    //then if input = combo two
-                    else if (inputTwo == comboTwo)
-                    {
-                        Window.Title = $"Combo One: Completed | Combo Two: Completed | Combo Three: {comboThree}";
-                        bool inputTwoComplete = true;
+                        //reset progress for THIS combo
+                        inputOneComplete = false;
+                        inputTwoComplete = false;
+                        inputOne = 0; 
+                        inputTwo = 0; 
+                        
                     }
                 }
-
-                //if input one and two are complete and input three is not complete
-                if (inputOneComplete == true && inputTwoComplete == true && inputThreeComplete == false)
-                {
-                    //check if arrows are pressed
-                    if (keyboardState.IsKeyDown(Keys.Up))
-                    {
-                        inputThree = 1;
-                    }
-                    else if (keyboardState.IsKeyDown(Keys.Down))
-                    {
-                        inputThree = 2;
-                    }
-                    else if (keyboardState.IsKeyDown(Keys.Left))
-                    {
-                        inputThree = 3;
-                    }
-                    else if (keyboardState.IsKeyDown(Keys.Right))
-                    {
-                        inputThree = 4;
-                    }
-
-                    //then if input = combo three
-                    else if (inputThree == comboThree)
-                    {
-                        Window.Title = $"Combo One: Completed | Combo Two: Completed | Combo Three: Completed";
-                        bool drinkingGameComplete = true;
-                    }
-                
-                    
-                }
-
             }
 
+            //display game status on the window title
+            string displayMessage;
+            string targetComboStr = $"{KeyToArrow(comboOne)} {KeyToArrow(comboTwo)} {KeyToArrow(comboThree)}";
+            string playerAttemptStr = "";
 
 
+            //just spacing for looks
+            if (inputOneComplete) playerAttemptStr += KeyToArrow(inputOne); else playerAttemptStr += "_";
+            playerAttemptStr += " "; 
+            if (inputTwoComplete) playerAttemptStr += KeyToArrow(inputTwo); else playerAttemptStr += "_";
+            playerAttemptStr += " ";
+            if (inputThreeComplete) playerAttemptStr += KeyToArrow(inputThree); else playerAttemptStr += "_"; 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            //title for now will remove later
+            if (drinkingGameComplete)
+            {
+                displayMessage = $"COMBO! {playerAttemptStr} - Press 'N' for next.";
+                if (keyboardState.IsKeyDown(Keys.N) && prevKeyboardState.IsKeyUp(Keys.N)) //new combo generation and reset everything
+                {
+                    comboOne = 0; 
+                }
+            }
+            else
+            {
+                displayMessage = $"Target: {targetComboStr} | You: {playerAttemptStr}";
+            }
+            Window.Title = displayMessage;
 
             #endregion
 
@@ -439,6 +385,22 @@ namespace Finalv2
 
             //draw arm and spin/roate it based on the armRotation variable
             _spriteBatch.Draw(tempArm, new Vector2(700, 730), null, Color.White, armRotation, new Vector2(455, 505), 1.0f, SpriteEffects.None, 0f);
+        }
+
+
+        //arrow key conversion for UI for now will switch later
+        public string KeyToArrow(int keyVal)
+        {
+            //converts number to arrow string for display
+            switch (keyVal)
+            {
+                case 0: return "_"; //placeholder for not-yet-entered keys
+                case 1: return "↑";
+                case 2: return "↓";
+                case 3: return "←";
+                case 4: return "→";
+                default: return "?"; //shouldn't happen
+            }
         }
     }
 }
