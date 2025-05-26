@@ -143,7 +143,7 @@ namespace Finalv2
             //TEST PURPOSE
             //Window.Title = $"AI Push: {aiPushForce:F4} | Anger Level: {angerLevel}";
 
-            drinkingGameLogic();
+            //drinkingGameLogic();
 
 
 
@@ -281,7 +281,6 @@ namespace Finalv2
             }
         }
 
-
         //arm wrestling minigame draw
         private void armWrestlingDraw()
         {
@@ -291,6 +290,7 @@ namespace Finalv2
             _spriteBatch.Draw(tempArm, new Vector2(700, 730), null, Color.White, armRotation, new Vector2(455, 505), 1.0f, SpriteEffects.None, 0f);
         }
 
+        //drinking game
         private void drinkingGameLogic()
         {
 
@@ -398,13 +398,11 @@ namespace Finalv2
             Window.Title = displayMessage;
         }
 
-
-
         //arrow key conversion for UI for now will switch later
         public string KeyToArrow(int keyVal)
         {
             //converts number to arrow string for display
-            switch (keyVal)
+            switch (keyVal)    
             {
                 case 0: return "_"; //placeholder for not-yet-entered keys
                 case 1: return "↑";
@@ -414,5 +412,11 @@ namespace Finalv2
                 default: return "?"; //shouldn't happen
             }
         }
+
+        //boxing game
+        private void boxingLogic() 
+        {
+        }
+
     }
 }
