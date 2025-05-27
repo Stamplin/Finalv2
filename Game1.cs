@@ -79,7 +79,7 @@ namespace Finalv2
         //5 = very angry
         #endregion
 
-        #region boxing game
+        #region shooting game
         //shootingDuel variables
 
         //bools
@@ -123,7 +123,8 @@ namespace Finalv2
 
             // will add later
 
-            //boxing game
+            //shooting
+            //game
 
 
             // TODO: use this.Content to load your game content here
@@ -413,8 +414,9 @@ namespace Finalv2
             }
         }
 
-        //boxing game
-        private void boxingLogic() 
+        //shooting
+        //game
+        private void shootingLogic() 
         {
         }
 
