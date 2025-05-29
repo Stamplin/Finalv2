@@ -87,7 +87,14 @@ namespace Finalv2
 
         //movement
 
-       
+
+        #endregion
+
+        #region boxing game
+        //load textures
+        Texture2D fistTexture, bgTexture;
+
+
         #endregion
 
 
@@ -124,7 +131,11 @@ namespace Finalv2
             // will add later
 
             //shooting
-            //game
+
+            //boxing
+
+
+
 
 
             // TODO: use this.Content to load your game content here
@@ -146,14 +157,11 @@ namespace Finalv2
 
             //drinkingGameLogic();
 
-
-
-
-
-
-
             //aiPushForceTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
             //armWrestlingLogic();
+
+
+
 
 
             base.Update(gameTime);
@@ -414,11 +422,25 @@ namespace Finalv2
             }
         }
 
-        //shooting
-        //game
+        //shooting game
         private void shootingLogic() 
         {
         }
 
+        //shooting game draw
+        private void shootingDraw() 
+        {
+        }
+
+
+        //boxing logic
+        private void boxingLogic()
+        { }
+
+
+        //boxing draw
+        private void boxingDraw()
+        {
+        }
     }
 }
