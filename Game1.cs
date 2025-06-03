@@ -87,12 +87,22 @@ namespace Finalv2
 
         //movement
 
+        //textures
+        Texture2D gunTexture, bgTextureShoot;
+
 
         #endregion
 
         #region boxing game
+
         //load textures
         Texture2D fistTexture, bgTexture;
+
+        //rectangles
+        Rectangle fistRec, fistRec2, bgRec;
+
+        //bools
+        bool boxingGameComplete = false;
 
 
         #endregion
@@ -115,6 +125,12 @@ namespace Finalv2
             _graphics.ApplyChanges();
             aiPushForce = rnd.Next(1, 4) * 0.01f; //base stat when game starts
 
+
+            //boxing
+            fistRec = new Rectangle(0, 300, 5*100, 5*100);
+            fistRec2 = new Rectangle(800, 300, 5 * 100, 5 * 100);
+            bgRec = new Rectangle(0, 0, 1280, 720);
+
             base.Initialize();
         }
 
@@ -131,10 +147,12 @@ namespace Finalv2
             // will add later
 
             //shooting
+            //gunTexture = Content.Load<Texture2D>("ShootingGame/Gun");
+            //bgTextureShoot = Content.Load<Texture2D>("ShootingGame/Background");
 
             //boxing
-
-
+            fistTexture = Content.Load<Texture2D>("Boxing/fist");
+            bgTexture = Content.Load<Texture2D>("Boxing/boxingbg");
 
 
 
@@ -153,12 +171,18 @@ namespace Finalv2
 
             //make winodow title show the aipushforce varible
             //TEST PURPOSE
-            //Window.Title = $"AI Push: {aiPushForce:F4} | Anger Level: {angerLevel}";
+            //Window.Title = $"AI Push: {aiPushForce:F4}                                                                                                                                                                                                                                                                 | Anger Level: {angerLevel}";
 
             //drinkingGameLogic();
 
             //aiPushForceTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
             //armWrestlingLogic();
+
+
+            //boxing logic
+            boxingLogic();
+
+
 
 
 
@@ -174,7 +198,8 @@ namespace Finalv2
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
-            armWrestlingDraw();
+            //armWrestlingDraw();
+            boxingDraw();
 
             _spriteBatch.End();
 
@@ -435,12 +460,16 @@ namespace Finalv2
 
         //boxing logic
         private void boxingLogic()
-        { }
+        { 
+        
+        }
 
 
         //boxing draw
         private void boxingDraw()
         {
+            _spriteBatch.Draw(fistTexture, fistRec, Color.White);
+            _spriteBatch.Draw(fistTexture, fistRec2, null, Color.White, 0, new(), SpriteEffects.FlipHorizontally, 0);
         }
     }
 }
