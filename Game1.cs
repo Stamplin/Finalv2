@@ -104,6 +104,7 @@ namespace Finalv2
         //bools
         bool boxingGameComplete = false;
 
+        parabolaTimer punchTimer = new parabolaTimer(0, 10, .2f);
 
         #endregion
 
@@ -171,19 +172,29 @@ namespace Finalv2
 
             //make winodow title show the aipushforce varible
             //TEST PURPOSE
-            //Window.Title = $"AI Push: {aiPushForce:F4}                                                                                                                                                                                                                                                                 | Anger Level: {angerLevel}";
+
+            /*
+            Window.Title = $"AI Push: {aiPushForce:F4}                                                                                                                                                                                                                                                                 | Anger Level: {angerLevel}";
+
+
+
+            aiPushForceTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            armWrestlingLogic();
+            */
 
             //drinkingGameLogic();
-
-            //aiPushForceTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            //armWrestlingLogic();
-
-
             //boxing logic
-            boxingLogic();
+            //boxingLogic();
 
+            //left click
 
+            punchTimer.update();
+            if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+            {
+                punchTimer.increase(20);
 
+            }
+            Window.Title = punchTimer.value().ToString();
 
 
 
@@ -468,8 +479,9 @@ namespace Finalv2
         //boxing draw
         private void boxingDraw()
         {
+            _spriteBatch.Draw(bgTexture, bgRec, Color.White);
             _spriteBatch.Draw(fistTexture, fistRec, Color.White);
-            _spriteBatch.Draw(fistTexture, fistRec2, null, Color.White, 0, new(), SpriteEffects.FlipHorizontally, 0);
+            _spriteBatch.Draw(fistTexture, fistRec2, null, Color.White, punchTimer.value() * -.01f, new(), SpriteEffects.FlipHorizontally, 0);
         }
     }
 }
