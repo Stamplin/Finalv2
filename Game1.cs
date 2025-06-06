@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -106,7 +107,14 @@ namespace Finalv2
 
         parabolaTimer punchTimer = new parabolaTimer(0, 10, .2f);
 
+        bool punching = false;
+        int punchDistance = 300;
+
         #endregion
+
+
+        float seconds = 0;
+        int shrinkSize = 1;
 
 
 
@@ -128,7 +136,10 @@ namespace Finalv2
 
 
             //boxing
-            fistRec = new Rectangle(0, 300, 5*100, 5*100);
+
+            
+
+            fistRec = new Rectangle(0, punchDistance, 5*100, 5*100);
             fistRec2 = new Rectangle(800, 300, 5 * 100, 5 * 100);
             bgRec = new Rectangle(0, 0, 1280, 720);
 
@@ -139,6 +150,7 @@ namespace Finalv2
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            
             //armwrestling
             backgroundTexture = Content.Load<Texture2D>("Arm/Background");
             tempArm = Content.Load<Texture2D>("Arm/Arm");
@@ -168,6 +180,11 @@ namespace Finalv2
             prevKeyboardState = keyboardState;
             keyboardState = Keyboard.GetState();
 
+
+
+
+            #region archive
+
             // TODO: Add your update logic here
 
             //make winodow title show the aipushforce varible
@@ -188,13 +205,58 @@ namespace Finalv2
 
             //left click
 
-            punchTimer.update();
-            if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+            //punchTimer.update();
+            //if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+            //{
+            //    punchTimer.increase(20);
+
+            //}
+            //Window.Title = punchTimer.value().ToString();
+
+            #endregion
+
+
+            seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            //if left click is pressed
+            if (keyboardState.IsKeyDown(Keys.Up))
             {
-                punchTimer.increase(20);
+                //set punching to true
+                punching = true;
+                //if punching true
+                if (punching)
+                {
+
+                    punchDistance -= 10;
+
+                    Window.Title = $"Punch Distance: {punchDistance}";
+                    fistRec = new Rectangle(0, punchDistance, 5 * (100 / shrinkSize), 5 * (100 / shrinkSize));
+
+
+
+
+                    //set punching to false
+                    punching = false;
+                }
 
             }
-            Window.Title = punchTimer.value().ToString();
+            //if down is pressed 
+            if (keyboardState.IsKeyDown(Keys.Down))
+            {
+                punchDistance += 10;
+                Window.Title = $"Punch Distance: {punchDistance}";
+                fistRec = new Rectangle(0, punchDistance, 5 * (100/shrinkSize), 5 * (100/shrinkSize));
+            }
+
+            //if punching distance is 300
+            if (punchDistance >= 300)
+            {
+                shrinkSize += 1;
+            }
+            else if (punchDistance <= 0)
+            {
+                shrinkSize = 1;
+            }
 
 
 
