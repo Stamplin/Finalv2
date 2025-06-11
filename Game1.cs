@@ -199,31 +199,31 @@ namespace Finalv2
                 Exit();
 
             //keyboard, mouse, time
-            KeyboardState ks = Keyboard.GetState();
-            MouseState ms = Mouse.GetState();
-            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            KeyboardState keyboardstate = Keyboard.GetState();
+            MouseState mousestate = Mouse.GetState();
+            float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 
 
-            if (actionTimer > 0) actionTimer -= dt;
+            if (actionTimer > 0) actionTimer -= gametime;
             else
             {
-                // Reset actions when cooldown ends
+                //cooldown
                 punchLeft = punchRight = false;
             }
 
-            // Blocking
-            isBlocking = ks.IsKeyDown(Keys.Space);
+            //blocking
+            isBlocking = keyboardstate.IsKeyDown(Keys.Space);
 
-            // Punch input
+            //punching
             if (actionTimer <= 0)
             {
-                if (ms.LeftButton == ButtonState.Pressed)
+                if (mousestate.LeftButton == ButtonState.Pressed)
                 {
                     punchLeft = true;
                     actionTimer = actionCooldown;
                 }
-                else if (ms.RightButton == ButtonState.Pressed)
+                else if (mousestate.RightButton == ButtonState.Pressed)
                 {
                     punchRight = true;
                     actionTimer = actionCooldown;
@@ -231,7 +231,7 @@ namespace Finalv2
             }
 
             // Update crosshair position
-            crosshairPosition = new Vector2(ms.X, ms.Y);
+            crosshairPosition = new Vector2(mousestate.X, mousestate.Y);
 
 
             base.Update(gameTime);
