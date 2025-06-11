@@ -110,6 +110,8 @@ namespace Finalv2
         bool punching = false;
         int punchDistance = 300;
 
+
+
         #endregion
 
 
@@ -136,9 +138,6 @@ namespace Finalv2
 
 
             //boxing
-
-            
-
             fistRec = new Rectangle(0, punchDistance, 5*100, 5*100);
             fistRec2 = new Rectangle(800, 300, 5 * 100, 5 * 100);
             bgRec = new Rectangle(0, 0, 1280, 720);
