@@ -39,7 +39,7 @@ namespace Finalv2
         bool inputTwoComplete = false;
         bool inputThreeComplete = false;
 
-        
+
 
 
 
@@ -161,12 +161,8 @@ namespace Finalv2
 
 
             //boxing
-
-            
-
-            fistRec = new Rectangle(0, punchDistance, 5*100, 5*100);
-            fistRec2 = new Rectangle(800, 300, 5 * 100, 5 * 100);
-            bgRec = new Rectangle(0, 0, 1280, 720);
+            screenBounds = new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height);
+            fistPosition = new Vector2(600, 400);
 
             base.Initialize();
         }
@@ -175,7 +171,7 @@ namespace Finalv2
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            
+
             //armwrestling
             backgroundTexture = Content.Load<Texture2D>("Arm/Background");
             tempArm = Content.Load<Texture2D>("Arm/Arm");
@@ -532,7 +528,7 @@ namespace Finalv2
         public string KeyToArrow(int keyVal)
         {
             //converts number to arrow string for display
-            switch (keyVal)    
+            switch (keyVal)
             {
                 case 0: return "_"; //placeholder for not-yet-entered keys
                 case 1: return "↑";
@@ -556,12 +552,12 @@ namespace Finalv2
 
 
         //shooting game
-        private void shootingLogic() 
+        private void shootingLogic()
         {
         }
 
         //shooting game draw
-        private void shootingDraw() 
+        private void shootingDraw()
         {
         }
 
@@ -577,15 +573,15 @@ namespace Finalv2
 
         //boxing logic
         private void boxingLogic()
-        { 
-        
+        {
+
         }
 
 
         //boxing draw
         private void boxingDraw()
         {
-            
+
         }
     }
 }
