@@ -94,29 +94,50 @@ namespace Finalv2
 
         #endregion
 
+
+
+
+
+
+
+
+
         #region boxing game
 
-        //load textures
-        Texture2D fistTexture, bgTexture;
+        //textures
+        Texture2D ringBg;
+        Texture2D fistTexture;
+        Texture2D crosshairTexture;
 
-        //rectangles
-        Rectangle fistRec, fistRec2, bgRec;
+        //variables
+        Vector2 fistPosition;
+        Vector2 crosshairPosition;
+        bool isBlocking;
+        bool punchLeft;
+        bool punchRight;
+        float actionCooldown = 0.3f;
+        float actionTimer = 0f;
 
-        //bools
-        bool boxingGameComplete = false;
-
-        parabolaTimer punchTimer = new parabolaTimer(0, 10, .2f);
-
-        bool punching = false;
-        int punchDistance = 300;
-
-
+        Rectangle screenBounds;
 
         #endregion
 
 
-        float seconds = 0;
-        int shrinkSize = 1;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -134,10 +155,15 @@ namespace Finalv2
             _graphics.PreferredBackBufferHeight = 720;
             _graphics.PreferredBackBufferWidth = 1280;
             _graphics.ApplyChanges();
+
+            //arm wrestling
             aiPushForce = rnd.Next(1, 4) * 0.01f; //base stat when game starts
 
 
             //boxing
+
+            
+
             fistRec = new Rectangle(0, punchDistance, 5*100, 5*100);
             fistRec2 = new Rectangle(800, 300, 5 * 100, 5 * 100);
             bgRec = new Rectangle(0, 0, 1280, 720);
@@ -155,7 +181,6 @@ namespace Finalv2
             tempArm = Content.Load<Texture2D>("Arm/Arm");
 
             //drinking game
-
             // will add later
 
             //shooting
@@ -163,8 +188,9 @@ namespace Finalv2
             //bgTextureShoot = Content.Load<Texture2D>("ShootingGame/Background");
 
             //boxing
+            ringBg = Content.Load<Texture2D>("Boxing/boxingbg");
             fistTexture = Content.Load<Texture2D>("Boxing/fist");
-            bgTexture = Content.Load<Texture2D>("Boxing/boxingbg");
+            crosshairTexture = Content.Load<Texture2D>("Boxing/crosshair");
 
 
 
@@ -176,88 +202,40 @@ namespace Finalv2
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            prevKeyboardState = keyboardState;
-            keyboardState = Keyboard.GetState();
+            //keyboard, mouse, time
+            KeyboardState keyboardstate = Keyboard.GetState();
+            MouseState mousestate = Mouse.GetState();
+            float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 
 
-
-            #region archive
-
-            // TODO: Add your update logic here
-
-            //make winodow title show the aipushforce varible
-            //TEST PURPOSE
-
-            /*
-            Window.Title = $"AI Push: {aiPushForce:F4}                                                                                                                                                                                                                                                                 | Anger Level: {angerLevel}";
-
-
-
-            aiPushForceTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            armWrestlingLogic();
-            */
-
-            //drinkingGameLogic();
-            //boxing logic
-            //boxingLogic();
-
-            //left click
-
-            //punchTimer.update();
-            //if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
-            //{
-            //    punchTimer.increase(20);
-
-            //}
-            //Window.Title = punchTimer.value().ToString();
-
-            #endregion
-
-
-            seconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            //if left click is pressed
-            if (keyboardState.IsKeyDown(Keys.Up))
+            if (actionTimer > 0) actionTimer -= gametime;
+            else
             {
-                //set punching to true
-                punching = true;
-                //if punching true
-                if (punching)
+                //cooldown
+                punchLeft = punchRight = false;
+            }
+
+            //blocking
+            isBlocking = keyboardstate.IsKeyDown(Keys.Space);
+
+            //punching
+            if (actionTimer <= 0)
+            {
+                if (mousestate.LeftButton == ButtonState.Pressed)
                 {
-
-                    punchDistance -= 10;
-
-                    Window.Title = $"Punch Distance: {punchDistance}";
-                    fistRec = new Rectangle(0, punchDistance, 5 * (100 / shrinkSize), 5 * (100 / shrinkSize));
-
-
-
-
-                    //set punching to false
-                    punching = false;
+                    punchLeft = true;
+                    actionTimer = actionCooldown;
                 }
-
-            }
-            //if down is pressed 
-            if (keyboardState.IsKeyDown(Keys.Down))
-            {
-                punchDistance += 10;
-                Window.Title = $"Punch Distance: {punchDistance}";
-                fistRec = new Rectangle(0, punchDistance, 5 * (100/shrinkSize), 5 * (100/shrinkSize));
+                else if (mousestate.RightButton == ButtonState.Pressed)
+                {
+                    punchRight = true;
+                    actionTimer = actionCooldown;
+                }
             }
 
-            //if punching distance is 300
-            if (punchDistance >= 300)
-            {
-                shrinkSize += 1;
-            }
-            else if (punchDistance <= 0)
-            {
-                shrinkSize = 1;
-            }
-
-
+            // Update crosshair position
+            crosshairPosition = new Vector2(mousestate.X, mousestate.Y);
 
 
             base.Update(gameTime);
@@ -270,14 +248,53 @@ namespace Finalv2
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
-            //armWrestlingDraw();
-            boxingDraw();
+
+
+
+
+
+            //draw bg
+            _spriteBatch.Draw(ringBg, screenBounds, Color.White);
+
+            //fist
+            Color fistColor = Color.White;
+            if (isBlocking) fistColor = Color.CornflowerBlue;
+            else if (punchLeft || punchRight) fistColor = Color.Red;
+
+
+            _spriteBatch.Draw(fistTexture, fistPosition, fistColor);
+
+            //crosshair
+            _spriteBatch.Draw(crosshairTexture, crosshairPosition - new Vector2(crosshairTexture.Width / 2, crosshairTexture.Height / 2), Color.White);
+
+
+
+
+
+
 
             _spriteBatch.End();
 
 
             base.Draw(gameTime);
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         //arm wrestling minigame logic
         private void armWrestlingLogic()
@@ -395,6 +412,13 @@ namespace Finalv2
             //draw arm and spin/roate it based on the armRotation variable
             _spriteBatch.Draw(tempArm, new Vector2(700, 730), null, Color.White, armRotation, new Vector2(455, 505), 1.0f, SpriteEffects.None, 0f);
         }
+
+
+
+
+
+
+
 
         //drinking game
         private void drinkingGameLogic()
@@ -519,6 +543,18 @@ namespace Finalv2
             }
         }
 
+
+
+
+
+
+
+
+
+
+
+
+
         //shooting game
         private void shootingLogic() 
         {
@@ -528,6 +564,15 @@ namespace Finalv2
         private void shootingDraw() 
         {
         }
+
+
+
+
+
+
+
+
+
 
 
         //boxing logic
@@ -540,9 +585,7 @@ namespace Finalv2
         //boxing draw
         private void boxingDraw()
         {
-            _spriteBatch.Draw(bgTexture, bgRec, Color.White);
-            _spriteBatch.Draw(fistTexture, fistRec, Color.White);
-            _spriteBatch.Draw(fistTexture, fistRec2, null, Color.White, punchTimer.value() * -.01f, new(), SpriteEffects.FlipHorizontally, 0);
+            
         }
     }
 }
