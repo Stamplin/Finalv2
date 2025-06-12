@@ -14,6 +14,8 @@ namespace Finalv2
         MouseState _mouseState;
         KeyboardState _keyboardState;
 
+        Vector2 windowSize = new (1280, 720);
+
         //random number generator
         Random rnd = new Random();
 
@@ -119,6 +121,11 @@ namespace Finalv2
 
         Rectangle screenBounds;
 
+
+        float scaleZoom = 0;
+        //Vector2 offset;
+        Vector2 offset = new Vector2(0, 0);
+
         #endregion
 
 
@@ -145,14 +152,14 @@ namespace Finalv2
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            IsMouseVisible = true;
+            IsMouseVisible = false;
         }
 
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            _graphics.PreferredBackBufferHeight = 720;
-            _graphics.PreferredBackBufferWidth = 1280;
+            _graphics.PreferredBackBufferHeight = (int)windowSize.Y;
+            _graphics.PreferredBackBufferWidth = (int)windowSize.X;
             _graphics.ApplyChanges();
 
             //arm wrestling
@@ -161,7 +168,13 @@ namespace Finalv2
 
             //boxing
             screenBounds = new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height);
-            fistPosition = new Vector2(600, 400);
+
+
+
+
+
+
+            fistPosition = new Vector2(0, 300);
 
             base.Initialize();
         }
@@ -200,6 +213,7 @@ namespace Finalv2
             //keyboard, mouse, time
             KeyboardState keyboardstate = Keyboard.GetState();
             MouseState mousestate = Mouse.GetState();
+
             float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 
@@ -229,6 +243,28 @@ namespace Finalv2
                 }
             }
 
+
+            //scale
+            if (keyboardstate.IsKeyDown(Keys.W)) scaleZoom += .01f;
+            else if (keyboardstate.IsKeyDown(Keys.S)) scaleZoom -= .01f;
+
+            //fake movement
+            if (keyboardstate.IsKeyDown(Keys.A)) offset.X += 10;
+            else if (keyboardstate.IsKeyDown(Keys.D)) offset.X -= 10;
+
+            scaleZoom = Math.Clamp(scaleZoom, 1.2f, 2f);
+
+            Window.Title = ringBg.Width.ToString();
+
+            //turn based on curor pos
+            offset += (windowSize/2 - new Vector2(mousestate.X, mousestate.Y))/10;
+            Mouse.SetPosition((int)windowSize.X/2, (int)windowSize.Y/2);
+
+            offset = Vector2.Clamp(offset, new Vector2(-ringBg.Width/2, -ringBg.Height/2), new Vector2(ringBg.Width/2, ringBg.Height/2));
+
+
+
+
             // Update crosshair position
             crosshairPosition = new Vector2(mousestate.X, mousestate.Y);
 
@@ -249,7 +285,10 @@ namespace Finalv2
 
 
             //draw bg
-            _spriteBatch.Draw(ringBg, screenBounds, Color.White);
+            _spriteBatch.Draw(ringBg, windowSize / 2 + offset, null, Color.White, 0, new(ringBg.Width/2, ringBg.Height/2), windowSize.Y/ringBg.Height * scaleZoom, SpriteEffects.None, 0f);
+
+
+
 
             //fist
             Color fistColor = Color.White;
@@ -260,7 +299,7 @@ namespace Finalv2
             _spriteBatch.Draw(fistTexture, fistPosition, fistColor);
 
             //crosshair
-            _spriteBatch.Draw(crosshairTexture, crosshairPosition - new Vector2(crosshairTexture.Width / 2, crosshairTexture.Height / 2), Color.White);
+            _spriteBatch.Draw(crosshairTexture, windowSize / 2 - new Vector2(crosshairTexture.Width, crosshairTexture.Height) / 2 * .5f,null,Color.White, 0,Vector2.Zero,.5f,SpriteEffects.None,0);
 
 
 
