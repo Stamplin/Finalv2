@@ -112,19 +112,19 @@ namespace Finalv2
 
         //variables
         Vector2 fistPosition;
-        Vector2 crosshairPosition;
         bool isBlocking;
         bool punchLeft;
         bool punchRight;
         float actionCooldown = 0.3f;
         float actionTimer = 0f;
 
-        Rectangle screenBounds;
-
-
         float scaleZoom = 0;
         //Vector2 offset;
         Vector2 offset = new Vector2(0, 0);
+
+        float drawScale;
+        float drawnWidth;
+        float drawnHeight;
 
         #endregion
 
@@ -165,9 +165,6 @@ namespace Finalv2
             //arm wrestling
             aiPushForce = rnd.Next(1, 4) * 0.01f; //base stat when game starts
 
-
-            //boxing
-            screenBounds = new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height);
 
 
 
@@ -254,19 +251,24 @@ namespace Finalv2
 
             scaleZoom = Math.Clamp(scaleZoom, 1.2f, 2f);
 
-            Window.Title = ringBg.Width.ToString();
-
-            //turn based on curor pos
+            //turn based on mouse pos
             offset += (windowSize/2 - new Vector2(mousestate.X, mousestate.Y))/10;
             Mouse.SetPosition((int)windowSize.X/2, (int)windowSize.Y/2);
 
-            offset = Vector2.Clamp(offset, new Vector2(-ringBg.Width/2, -ringBg.Height/2), new Vector2(ringBg.Width/2, ringBg.Height/2));
+            //find screensize width and height
+            drawScale = windowSize.Y / (float)ringBg.Height * scaleZoom;
+            drawnWidth = ringBg.Width * drawScale;
+            drawnHeight = ringBg.Height * drawScale;
+
+            //give extra so dont cut off
+            Vector2 maxOffset = new Vector2((drawnWidth - windowSize.X) / 2f, (drawnHeight - windowSize.Y) / 2f);
+            offset = Vector2.Clamp(offset,-maxOffset, maxOffset);
 
 
 
 
-            // Update crosshair position
-            crosshairPosition = new Vector2(mousestate.X, mousestate.Y);
+
+
 
 
             base.Update(gameTime);
@@ -298,9 +300,8 @@ namespace Finalv2
 
             _spriteBatch.Draw(fistTexture, fistPosition, fistColor);
 
-            //crosshair
-            _spriteBatch.Draw(crosshairTexture, windowSize / 2 - new Vector2(crosshairTexture.Width, crosshairTexture.Height) / 2 * .5f,null,Color.White, 0,Vector2.Zero,.5f,SpriteEffects.None,0);
-
+            //crosshair 
+            _spriteBatch.Draw(crosshairTexture, new Vector2(windowSize.X / 2, windowSize.Y / 2), null, Color.White, 0f, new Vector2(crosshairTexture.Width / 2, crosshairTexture.Height / 2), 0.2f, SpriteEffects.None, 0f);
 
 
 
