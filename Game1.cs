@@ -102,7 +102,6 @@ namespace Finalv2
 
 
 
-
         #region boxing game
 
         //textures
@@ -130,6 +129,19 @@ namespace Finalv2
         float drawScale;
         float drawnWidth;
         float drawnHeight;
+
+        //enemy
+        Texture2D enemyGuardTexture;
+        Texture2D enemyPunchTexture;
+        Texture2D enemyBlockTexture;
+        Texture2D enemyHurtTexture;
+
+        Vector2 enemyPosition;
+        float enemyActionTimer = 0f;
+        const float enemyActionCooldown = 1.5f;
+
+        int enemyHealth = 3;
+        int playerHealth = 3;
 
 
 
@@ -178,6 +190,8 @@ namespace Finalv2
 
             //boxing
             fistPosition = new Vector2(720/2, 350);
+            enemyPosition = new Vector2(windowSize.X / 2 + 200, windowSize.Y / 2);
+            enemyActionTimer = enemyActionCooldown;
 
             base.Initialize();
         }
@@ -206,6 +220,11 @@ namespace Finalv2
             fistPunchTexture = Content.Load<Texture2D>("Boxing/punch");
             fistBlockTexture = Content.Load<Texture2D>("Boxing/block");
 
+            enemyGuardTexture = Content.Load<Texture2D>("Boxing/eguard");
+            enemyPunchTexture = Content.Load<Texture2D>("Boxing/epunch");
+            enemyBlockTexture = Content.Load<Texture2D>("Boxing/eblock");
+            enemyHurtTexture = Content.Load<Texture2D>("Boxing/ehurt");
+
 
 
             // TODO: use this.Content to load your game content here
@@ -221,6 +240,30 @@ namespace Finalv2
             MouseState mousestate = Mouse.GetState();
 
             float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+
+            //enemy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             //blocking
             isBlocking = keyboardstate.IsKeyDown(Keys.Space) || mousestate.RightButton == ButtonState.Pressed;
