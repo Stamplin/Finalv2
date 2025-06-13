@@ -365,7 +365,7 @@ namespace Finalv2
                 enemyToDraw = enemyGuardTexture;
 
 
-            Vector2 enemyDrawPos = windowSize / 2 + offset + new Vector2(0, enemyYOffset);
+            Vector2 enemyDrawPos = windowSize / 2 + offset + new Vector2(0, enemyYOffset * drawScale);
 
             _spriteBatch.Draw(enemyPunchTexture, enemyDrawPos, null, Color.White, 0f, new Vector2(enemyPunchTexture.Width / 2f, enemyPunchTexture.Height / 2f), windowSize.Y / (float)ringBg.Height * scaleZoom, SpriteEffects.None,0f);
 
