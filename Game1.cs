@@ -118,7 +118,6 @@ namespace Finalv2
         Vector2 fistPosition;
         bool isBlocking;
         bool punchLeft;
-        bool punchRight;
         float actionCooldown = 0.3f;
         float actionTimer = 0f;
 
@@ -143,6 +142,8 @@ namespace Finalv2
         int enemyHealth = 3;
         int playerHealth = 3;
 
+        bool enemyPunch, enemyBlock, enemyHurt;
+        float enemyYOffset = 190f;
 
 
 
@@ -190,6 +191,8 @@ namespace Finalv2
 
             //boxing
             fistPosition = new Vector2(720/2, 350);
+
+
             enemyPosition = new Vector2(windowSize.X / 2 + 200, windowSize.Y / 2);
             enemyActionTimer = enemyActionCooldown;
 
@@ -245,21 +248,34 @@ namespace Finalv2
             //enemy
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            if (enemyActionTimer <= 0f)
+            {
+                //randomly choose an action for the enemy
+                int action = rnd.Next(1, 4); // 1 = punch, 2 = block, 3 = guard
+                if (action == 1)
+                {
+                    enemyPunch = true;
+                    enemyBlock = false;
+                    enemyHurt = false;
+                }
+                else if (action == 2)
+                {
+                    enemyPunch = false;
+                    enemyBlock = true;
+                    enemyHurt = false;
+                }
+                else
+                {
+                    enemyPunch = false;
+                    enemyBlock = false;
+                    enemyHurt = true;
+                }
+                enemyActionTimer = enemyActionCooldown; //reset timer
+            }
+            else
+            {
+                enemyActionTimer -= gametime; //decrease timer
+            }
 
 
 
@@ -296,9 +312,9 @@ namespace Finalv2
             //fake movement
             if (keyboardstate.IsKeyDown(Keys.A)) offset.X += 10;
             else if (keyboardstate.IsKeyDown(Keys.D)) offset.X -= 10;
+
             //clamp
             scaleZoom = Math.Clamp(scaleZoom, 1.4f, 2.4f);
-
 
             //turn based on mouse pos
             offset += (windowSize/2 - new Vector2(mousestate.X, mousestate.Y))/10;
@@ -332,12 +348,30 @@ namespace Finalv2
 
 
 
-
-
-
             //draw bg
             _spriteBatch.Draw(ringBg, windowSize / 2 + offset, null, Color.White, 0, new(ringBg.Width/2, ringBg.Height/2), windowSize.Y/ringBg.Height * scaleZoom, SpriteEffects.None, 0f);
 
+            
+
+            //enemy
+            Texture2D enemyToDraw;
+            if (enemyPunch)
+                enemyToDraw = enemyPunchTexture;
+            else if (enemyBlock)
+                enemyToDraw = enemyBlockTexture;
+            else if (enemyHurt)
+                enemyToDraw = enemyHurtTexture;
+            else
+                enemyToDraw = enemyGuardTexture;
+
+
+            Vector2 enemyDrawPos = windowSize / 2 + offset + new Vector2(0, enemyYOffset);
+
+            _spriteBatch.Draw(enemyPunchTexture, enemyDrawPos, null, Color.White, 0f, new Vector2(enemyPunchTexture.Width / 2f, enemyPunchTexture.Height / 2f), windowSize.Y / (float)ringBg.Height * scaleZoom, SpriteEffects.None,0f);
+
+
+            //show enemy scale size
+            Window.Title = $"Scale: {drawScale:F2}";
 
 
 
@@ -355,9 +389,6 @@ namespace Finalv2
 
             //crosshair 
             _spriteBatch.Draw(crosshairTexture, new Vector2(windowSize.X / 2, windowSize.Y / 2), null, Color.White, 0f, new Vector2(crosshairTexture.Width / 2, crosshairTexture.Height / 2), 0.2f, SpriteEffects.None, 0f);
-
-
-
 
 
 
