@@ -110,6 +110,11 @@ namespace Finalv2
         Texture2D fistTexture;
         Texture2D crosshairTexture;
 
+        Texture2D fistGuardTexture;
+        Texture2D fistPunchTexture;
+        Texture2D fistBlockTexture;
+
+
         //variables
         Vector2 fistPosition;
         bool isBlocking;
@@ -125,6 +130,11 @@ namespace Finalv2
         float drawScale;
         float drawnWidth;
         float drawnHeight;
+
+
+
+
+
 
         #endregion
 
@@ -166,12 +176,8 @@ namespace Finalv2
             aiPushForce = rnd.Next(1, 4) * 0.01f; //base stat when game starts
 
 
-
-
-
-
-
-            fistPosition = new Vector2(0, 300);
+            //boxing
+            fistPosition = new Vector2(720/2, 350);
 
             base.Initialize();
         }
@@ -194,8 +200,11 @@ namespace Finalv2
 
             //boxing
             ringBg = Content.Load<Texture2D>("Boxing/boxingbg");
-            fistTexture = Content.Load<Texture2D>("Boxing/fist");
             crosshairTexture = Content.Load<Texture2D>("Boxing/crosshair");
+
+            fistGuardTexture = Content.Load<Texture2D>("Boxing/guard");
+            fistPunchTexture = Content.Load<Texture2D>("Boxing/punch");
+            fistBlockTexture = Content.Load<Texture2D>("Boxing/block");
 
 
 
@@ -213,32 +222,28 @@ namespace Finalv2
 
             float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-
-
-            if (actionTimer > 0) actionTimer -= gametime;
-            else
-            {
-                //cooldown
-                punchLeft = punchRight = false;
-            }
-
             //blocking
-            isBlocking = keyboardstate.IsKeyDown(Keys.Space);
+            isBlocking = keyboardstate.IsKeyDown(Keys.Space) || mousestate.RightButton == ButtonState.Pressed;
 
             //punching
-            if (actionTimer <= 0)
+            if (actionTimer <= 0 && mousestate.LeftButton == ButtonState.Pressed)
             {
-                if (mousestate.LeftButton == ButtonState.Pressed)
-                {
-                    punchLeft = true;
-                    actionTimer = actionCooldown;
-                }
-                else if (mousestate.RightButton == ButtonState.Pressed)
-                {
-                    punchRight = true;
-                    actionTimer = actionCooldown;
-                }
+                punchLeft = true;
+                actionTimer = actionCooldown;
             }
+
+            // reset punch when cooldown expires
+            if (actionTimer > 0) actionTimer -= gametime;
+            else punchLeft = false;
+
+
+
+
+
+
+
+
+
 
 
             //scale
@@ -248,8 +253,9 @@ namespace Finalv2
             //fake movement
             if (keyboardstate.IsKeyDown(Keys.A)) offset.X += 10;
             else if (keyboardstate.IsKeyDown(Keys.D)) offset.X -= 10;
+            //clamp
+            scaleZoom = Math.Clamp(scaleZoom, 1.4f, 2.4f);
 
-            scaleZoom = Math.Clamp(scaleZoom, 1.2f, 2f);
 
             //turn based on mouse pos
             offset += (windowSize/2 - new Vector2(mousestate.X, mousestate.Y))/10;
@@ -293,12 +299,16 @@ namespace Finalv2
 
 
             //fist
-            Color fistColor = Color.White;
-            if (isBlocking) fistColor = Color.CornflowerBlue;
-            else if (punchLeft || punchRight) fistColor = Color.Red;
+            Texture2D fistToDraw;
+            if (punchLeft)
+                fistToDraw = fistPunchTexture;
+            else if (isBlocking)
+                fistToDraw = fistBlockTexture;
+            else
+                fistToDraw = fistGuardTexture;
 
+            _spriteBatch.Draw(fistToDraw, fistPosition, Color.White);
 
-            _spriteBatch.Draw(fistTexture, fistPosition, fistColor);
 
             //crosshair 
             _spriteBatch.Draw(crosshairTexture, new Vector2(windowSize.X / 2, windowSize.Y / 2), null, Color.White, 0f, new Vector2(crosshairTexture.Width / 2, crosshairTexture.Height / 2), 0.2f, SpriteEffects.None, 0f);
