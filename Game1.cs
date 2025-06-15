@@ -144,6 +144,26 @@ namespace Finalv2
 
         bool enemyPunch, enemyBlock, enemyHurt;
         float enemyYOffset = 190f;
+        float enemyXOffset = 0f;
+
+        bool enemyAIActive = false;
+
+
+
+
+        //movement define
+        const float enemyXStep = 100f;
+
+        // current scale multiplier for the enemy sprite
+        float enemyScaleOffset = 1f;
+        // how much we grow/shrink on each “move”
+        const float enemyScaleStep = 0.05f;
+        // clamp range so it never disappears or explodes
+        const float minEnemyScaleOff = 0.8f;
+        const float maxEnemyScaleOff = 1.2f;
+
+
+ 
 
 
 
@@ -246,36 +266,82 @@ namespace Finalv2
 
 
             //enemy
-
-
-            if (enemyActionTimer <= 0f)
+            
+            //if scale is greater than 1.5, then enemy AI is active
+            if (scaleZoom >= 1.5f)
             {
-                //randomly choose an action for the enemy
-                int action = rnd.Next(1, 4); // 1 = punch, 2 = block, 3 = guard
-                if (action == 1)
+                enemyAIActive = true;
+            }
+
+            //if enemy AI is active
+            if (enemyAIActive)
+            {
+                if (enemyActionTimer <= 0f)
                 {
-                    enemyPunch = true;
-                    enemyBlock = false;
-                    enemyHurt = false;
-                }
-                else if (action == 2)
-                {
-                    enemyPunch = false;
-                    enemyBlock = true;
-                    enemyHurt = false;
+                    //fake left and right
+                    if (rnd.Next(0, 2) == 0)
+                    {
+                        enemyXOffset += enemyXStep;
+                    }
+                    else
+                    {
+                        enemyXOffset -= enemyXStep;
+                    }
+
+                    //fake forward and back
+                    if (rnd.Next(0, 2) == 0)
+                    {
+                        enemyScaleOffset += enemyScaleStep;
+                    }
+                    else
+                    {
+                        enemyScaleOffset -= enemyScaleStep;
+                    }
+                    enemyScaleOffset = MathHelper.Clamp(enemyScaleOffset, minEnemyScaleOff, maxEnemyScaleOff);
+
+                    //enemy clamp
+                    float maxX = (drawnWidth - windowSize.X) / 2f / drawScale;
+                    if (enemyXOffset > maxX) enemyXOffset = maxX;
+                    if (enemyXOffset < -maxX) enemyXOffset = -maxX;
+
+                    //reset timer
+                    enemyActionTimer = enemyActionCooldown;
+
                 }
                 else
                 {
-                    enemyPunch = false;
-                    enemyBlock = false;
-                    enemyHurt = true;
+                    enemyActionTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                 }
-                enemyActionTimer = enemyActionCooldown; //reset timer
+
+                //ai will punch, block every 1.5 seconds
+                if (enemyActionTimer <= 0f)
+                {
+                    int action = rnd.Next(1, 3); // 1 = punch, 2 = block, 3 = hurt
+                    if (action == 1)
+                    {
+                        enemyPunch = true;
+                        enemyBlock = false;
+                        enemyHurt = false;
+                    }
+                    else if (action == 2)
+                    {
+                        enemyPunch = false;
+                        enemyBlock = true;
+                        enemyHurt = false;
+                    }
+                }
             }
-            else
-            {
-                enemyActionTimer -= gametime; //decrease timer
-            }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -355,6 +421,7 @@ namespace Finalv2
 
             //enemy
             Texture2D enemyToDraw;
+
             if (enemyPunch)
                 enemyToDraw = enemyPunchTexture;
             else if (enemyBlock)
@@ -365,9 +432,13 @@ namespace Finalv2
                 enemyToDraw = enemyGuardTexture;
 
 
-            Vector2 enemyDrawPos = windowSize / 2 + offset + new Vector2(0, enemyYOffset * drawScale);
+            //scaling
+            float baseScale = windowSize.Y / (float)ringBg.Height * scaleZoom;
+            float enemyDrawScale = baseScale * enemyScaleOffset;
 
-            _spriteBatch.Draw(enemyPunchTexture, enemyDrawPos, null, Color.White, 0f, new Vector2(enemyPunchTexture.Width / 2f, enemyPunchTexture.Height / 2f), windowSize.Y / (float)ringBg.Height * scaleZoom, SpriteEffects.None,0f);
+            Vector2 enemyDrawPos = windowSize / 2 + offset+ new Vector2(enemyXOffset * drawScale,enemyYOffset * drawScale); 
+
+            _spriteBatch.Draw(enemyToDraw,enemyDrawPos,null,Color.White,0f,new Vector2(enemyToDraw.Width / 2f, enemyToDraw.Height / 2f),enemyDrawScale,SpriteEffects.None,0f);
 
 
             //show enemy scale size
