@@ -316,7 +316,7 @@ namespace Finalv2
                 //ai will punch, block every 1.5 seconds
                 if (enemyActionTimer <= 0f)
                 {
-                    int action = rnd.Next(1, 3); // 1 = punch, 2 = block, 3 = hurt
+                    int action = rnd.Next(1, 3); // 1 = punch, 2 = block
                     if (action == 1)
                     {
                         enemyPunch = true;
