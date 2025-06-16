@@ -90,7 +90,7 @@ namespace Finalv2
         //movement
 
         //textures
-        Texture2D gunTexture, bgTextureShoot;
+        Texture2D gunTexture, bgTextureShoot, stanceDuelTexture;
 
 
         #endregion
@@ -232,8 +232,9 @@ namespace Finalv2
             // will add later
 
             //shooting
-            //gunTexture = Content.Load<Texture2D>("ShootingGame/Gun");
-            //bgTextureShoot = Content.Load<Texture2D>("ShootingGame/Background");
+            gunTexture = Content.Load<Texture2D>("ShootingGame/Gun");
+            bgTextureShoot = Content.Load<Texture2D>("ShootingGame/Background");
+            stanceDuelTexture = Content.Load<Texture2D>("ShootingGame/stanceDuel");
 
             //boxing
             ringBg = Content.Load<Texture2D>("Boxing/boxingbg");
@@ -258,144 +259,7 @@ namespace Finalv2
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            //keyboard, mouse, time
-            KeyboardState keyboardstate = Keyboard.GetState();
-            MouseState mousestate = Mouse.GetState();
-
             float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-
-            //enemy
-            
-            //if scale is greater than 1.5, then enemy AI is active
-            if (scaleZoom >= 1.5f)
-            {
-                enemyAIActive = true;
-            }
-
-            //if enemy AI is active
-            if (enemyAIActive)
-            {
-                if (enemyActionTimer <= 0f)
-                {
-                    //fake left and right
-                    if (rnd.Next(0, 2) == 0)
-                    {
-                        enemyXOffset += enemyXStep;
-                    }
-                    else
-                    {
-                        enemyXOffset -= enemyXStep;
-                    }
-
-                    //fake forward and back
-                    if (rnd.Next(0, 2) == 0)
-                    {
-                        enemyScaleOffset += enemyScaleStep;
-                    }
-                    else
-                    {
-                        enemyScaleOffset -= enemyScaleStep;
-                    }
-                    enemyScaleOffset = MathHelper.Clamp(enemyScaleOffset, minEnemyScaleOff, maxEnemyScaleOff);
-
-                    //enemy clamp
-                    float maxX = (drawnWidth - windowSize.X) / 2f / drawScale;
-                    if (enemyXOffset > maxX) enemyXOffset = maxX;
-                    if (enemyXOffset < -maxX) enemyXOffset = -maxX;
-
-                    //reset timer
-                    enemyActionTimer = enemyActionCooldown;
-
-                }
-                else
-                {
-                    enemyActionTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
-                }
-
-                //ai will punch, block every 1.5 seconds
-                if (enemyActionTimer <= 0f)
-                {
-                    int action = rnd.Next(1, 3); // 1 = punch, 2 = block
-                    if (action == 1)
-                    {
-                        enemyPunch = true;
-                        enemyBlock = false;
-                        enemyHurt = false;
-                    }
-                    else if (action == 2)
-                    {
-                        enemyPunch = false;
-                        enemyBlock = true;
-                        enemyHurt = false;
-                    }
-                }
-            }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //blocking
-            isBlocking = keyboardstate.IsKeyDown(Keys.Space) || mousestate.RightButton == ButtonState.Pressed;
-
-            //punching
-            if (actionTimer <= 0 && mousestate.LeftButton == ButtonState.Pressed)
-            {
-                punchLeft = true;
-                actionTimer = actionCooldown;
-            }
-
-            // reset punch when cooldown expires
-            if (actionTimer > 0) actionTimer -= gametime;
-            else punchLeft = false;
-
-
-
-
-
-
-
-
-
-
-
-            //scale
-            if (keyboardstate.IsKeyDown(Keys.W)) scaleZoom += .01f;
-            else if (keyboardstate.IsKeyDown(Keys.S)) scaleZoom -= .01f;
-
-            //fake movement
-            if (keyboardstate.IsKeyDown(Keys.A)) offset.X += 10;
-            else if (keyboardstate.IsKeyDown(Keys.D)) offset.X -= 10;
-
-            //clamp
-            scaleZoom = Math.Clamp(scaleZoom, 1.4f, 2.4f);
-
-            //turn based on mouse pos
-            offset += (windowSize/2 - new Vector2(mousestate.X, mousestate.Y))/10;
-            Mouse.SetPosition((int)windowSize.X/2, (int)windowSize.Y/2);
-
-            //find screensize width and height
-            drawScale = windowSize.Y / (float)ringBg.Height * scaleZoom;
-            drawnWidth = ringBg.Width * drawScale;
-            drawnHeight = ringBg.Height * drawScale;
-
-            //give extra so dont cut off
-            Vector2 maxOffset = new Vector2((drawnWidth - windowSize.X) / 2f, (drawnHeight - windowSize.Y) / 2f);
-            offset = Vector2.Clamp(offset,-maxOffset, maxOffset);
-
-
 
 
 
@@ -412,54 +276,6 @@ namespace Finalv2
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
-
-
-            //draw bg
-            _spriteBatch.Draw(ringBg, windowSize / 2 + offset, null, Color.White, 0, new(ringBg.Width/2, ringBg.Height/2), windowSize.Y/ringBg.Height * scaleZoom, SpriteEffects.None, 0f);
-
-            
-
-            //enemy
-            Texture2D enemyToDraw;
-
-            if (enemyPunch)
-                enemyToDraw = enemyPunchTexture;
-            else if (enemyBlock)
-                enemyToDraw = enemyBlockTexture;
-            else if (enemyHurt)
-                enemyToDraw = enemyHurtTexture;
-            else
-                enemyToDraw = enemyGuardTexture;
-
-
-            //scaling
-            float baseScale = windowSize.Y / (float)ringBg.Height * scaleZoom;
-            float enemyDrawScale = baseScale * enemyScaleOffset;
-
-            Vector2 enemyDrawPos = windowSize / 2 + offset+ new Vector2(enemyXOffset * drawScale,enemyYOffset * drawScale); 
-
-            _spriteBatch.Draw(enemyToDraw,enemyDrawPos,null,Color.White,0f,new Vector2(enemyToDraw.Width / 2f, enemyToDraw.Height / 2f),enemyDrawScale,SpriteEffects.None,0f);
-
-
-            //show enemy scale size
-            Window.Title = $"Scale: {drawScale:F2}";
-
-
-
-            //fist
-            Texture2D fistToDraw;
-            if (punchLeft)
-                fistToDraw = fistPunchTexture;
-            else if (isBlocking)
-                fistToDraw = fistBlockTexture;
-            else
-                fistToDraw = fistGuardTexture;
-
-            _spriteBatch.Draw(fistToDraw, fistPosition, Color.White);
-
-
-            //crosshair 
-            _spriteBatch.Draw(crosshairTexture, new Vector2(windowSize.X / 2, windowSize.Y / 2), null, Color.White, 0f, new Vector2(crosshairTexture.Width / 2, crosshairTexture.Height / 2), 0.2f, SpriteEffects.None, 0f);
 
 
 
@@ -766,8 +582,149 @@ namespace Finalv2
 
 
         //boxing logic
-        private void boxingLogic()
+        private void boxingLogic(GameTime gameTime)
         {
+            float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            //keyboard, mouse, time
+            KeyboardState keyboardstate = Keyboard.GetState();
+            MouseState mousestate = Mouse.GetState();
+
+
+            //enemy
+
+            //if scale is greater than 1.5, then enemy AI is active
+            if (scaleZoom >= 1.5f)
+            {
+                enemyAIActive = true;
+            }
+
+            //if enemy AI is active
+            if (enemyAIActive)
+            {
+                if (enemyActionTimer <= 0f)
+                {
+                    //fake left and right
+                    if (rnd.Next(0, 2) == 0)
+                    {
+                        enemyXOffset += enemyXStep;
+                    }
+                    else
+                    {
+                        enemyXOffset -= enemyXStep;
+                    }
+
+                    //fake forward and back
+                    if (rnd.Next(0, 2) == 0)
+                    {
+                        enemyScaleOffset += enemyScaleStep;
+                    }
+                    else
+                    {
+                        enemyScaleOffset -= enemyScaleStep;
+                    }
+                    enemyScaleOffset = MathHelper.Clamp(enemyScaleOffset, minEnemyScaleOff, maxEnemyScaleOff);
+
+                    //enemy clamp
+                    float maxX = (drawnWidth - windowSize.X) / 2f / drawScale;
+                    if (enemyXOffset > maxX) enemyXOffset = maxX;
+                    if (enemyXOffset < -maxX) enemyXOffset = -maxX;
+
+                    //reset timer
+                    enemyActionTimer = enemyActionCooldown;
+
+                }
+                else
+                {
+                    enemyActionTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
+                }
+
+                //ai will punch, block every 1.5 seconds
+                if (enemyActionTimer <= 0f)
+                {
+                    int action = rnd.Next(1, 3); // 1 = punch, 2 = block
+                    if (action == 1)
+                    {
+                        enemyPunch = true;
+                        enemyBlock = false;
+                        enemyHurt = false;
+                    }
+                    else if (action == 2)
+                    {
+                        enemyPunch = false;
+                        enemyBlock = true;
+                        enemyHurt = false;
+                    }
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            //blocking
+            isBlocking = keyboardstate.IsKeyDown(Keys.Space) || mousestate.RightButton == ButtonState.Pressed;
+
+            //punching
+            if (actionTimer <= 0 && mousestate.LeftButton == ButtonState.Pressed)
+            {
+                punchLeft = true;
+                actionTimer = actionCooldown;
+            }
+
+            // reset punch when cooldown expires
+            if (actionTimer > 0) actionTimer -= gametime;
+            else punchLeft = false;
+
+
+
+
+
+
+
+
+
+
+
+            //scale
+            if (keyboardstate.IsKeyDown(Keys.W)) scaleZoom += .01f;
+            else if (keyboardstate.IsKeyDown(Keys.S)) scaleZoom -= .01f;
+
+            //fake movement
+            if (keyboardstate.IsKeyDown(Keys.A)) offset.X += 10;
+            else if (keyboardstate.IsKeyDown(Keys.D)) offset.X -= 10;
+
+            //clamp
+            scaleZoom = Math.Clamp(scaleZoom, 1.4f, 2.4f);
+
+            //turn based on mouse pos
+            offset += (windowSize / 2 - new Vector2(mousestate.X, mousestate.Y)) / 10;
+            Mouse.SetPosition((int)windowSize.X / 2, (int)windowSize.Y / 2);
+
+            //find screensize width and height
+            drawScale = windowSize.Y / (float)ringBg.Height * scaleZoom;
+            drawnWidth = ringBg.Width * drawScale;
+            drawnHeight = ringBg.Height * drawScale;
+
+            //give extra so dont cut off
+            Vector2 maxOffset = new Vector2((drawnWidth - windowSize.X) / 2f, (drawnHeight - windowSize.Y) / 2f);
+            offset = Vector2.Clamp(offset, -maxOffset, maxOffset);
+
+
+
+
+
 
         }
 
@@ -775,6 +732,54 @@ namespace Finalv2
         //boxing draw
         private void boxingDraw()
         {
+
+
+            //draw bg
+            _spriteBatch.Draw(ringBg, windowSize / 2 + offset, null, Color.White, 0, new(ringBg.Width / 2, ringBg.Height / 2), windowSize.Y / ringBg.Height * scaleZoom, SpriteEffects.None, 0f);
+
+
+
+            //enemy
+            Texture2D enemyToDraw;
+
+            if (enemyPunch)
+                enemyToDraw = enemyPunchTexture;
+            else if (enemyBlock)
+                enemyToDraw = enemyBlockTexture;
+            else if (enemyHurt)
+                enemyToDraw = enemyHurtTexture;
+            else
+                enemyToDraw = enemyGuardTexture;
+
+
+            //scaling
+            float baseScale = windowSize.Y / (float)ringBg.Height * scaleZoom;
+            float enemyDrawScale = baseScale * enemyScaleOffset;
+
+            Vector2 enemyDrawPos = windowSize / 2 + offset + new Vector2(enemyXOffset * drawScale, enemyYOffset * drawScale);
+
+            _spriteBatch.Draw(enemyToDraw, enemyDrawPos, null, Color.White, 0f, new Vector2(enemyToDraw.Width / 2f, enemyToDraw.Height / 2f), enemyDrawScale, SpriteEffects.None, 0f);
+
+
+            //show enemy scale size
+            Window.Title = $"Scale: {drawScale:F2}";
+
+
+
+            //fist
+            Texture2D fistToDraw;
+            if (punchLeft)
+                fistToDraw = fistPunchTexture;
+            else if (isBlocking)
+                fistToDraw = fistBlockTexture;
+            else
+                fistToDraw = fistGuardTexture;
+
+            _spriteBatch.Draw(fistToDraw, fistPosition, Color.White);
+
+
+            //crosshair 
+            _spriteBatch.Draw(crosshairTexture, new Vector2(windowSize.X / 2, windowSize.Y / 2), null, Color.White, 0f, new Vector2(crosshairTexture.Width / 2, crosshairTexture.Height / 2), 0.2f, SpriteEffects.None, 0f);
 
         }
     }
