@@ -44,6 +44,8 @@ namespace Finalv2
 
 
 
+
+
         #endregion
 
         #region arm wrestling
@@ -148,22 +150,42 @@ namespace Finalv2
 
         bool enemyAIActive = false;
 
-
-
-
-        //movement define
         const float enemyXStep = 100f;
-
-        // current scale multiplier for the enemy sprite
         float enemyScaleOffset = 1f;
-        // how much we grow/shrink on each “move”
         const float enemyScaleStep = 0.05f;
-        // clamp range so it never disappears or explodes
         const float minEnemyScaleOff = 0.8f;
         const float maxEnemyScaleOff = 1.2f;
 
 
- 
+        //combat
+        const float punchRangeScale = 1.6f; 
+        const float punchWindupTime = 0.5f;   
+        const float punchHoldTime = 0.5f;
+        float punchTimer = 0f;     
+        bool enemyInRange = false;
+        bool enemyWindingUp = false; 
+        bool enemyPunching = false;
+        float hurtTimer = 0f;
+        const float hurtTime = 0.3f;
+        const int maxEnemyHealth = 10;
+       
+
+        //for guard cooldown before/after punch
+        const float postPunchGuardTime = 1f;
+        const float prePunchGuardTime = 1f;
+        float guardCooldownTimer = 0f;
+
+        //health and stamina
+        const int maxPlayerStamina = 2;
+        int playerStamina = maxPlayerStamina;
+        Texture2D heartTexture;
+        Texture2D gloveTexture;
+        const float iconScale = 0.15f;
+        float staminaRechargeTimer = 0f;
+        const float staminaRechargeDelay = 1f;
+
+
+
 
 
 
@@ -212,9 +234,10 @@ namespace Finalv2
             //boxing
             fistPosition = new Vector2(720/2, 350);
 
-
+            //combat - boxing
             enemyPosition = new Vector2(windowSize.X / 2 + 200, windowSize.Y / 2);
             enemyActionTimer = enemyActionCooldown;
+            enemyHealth = maxEnemyHealth;
 
             base.Initialize();
         }
@@ -232,9 +255,9 @@ namespace Finalv2
             // will add later
 
             //shooting
-            gunTexture = Content.Load<Texture2D>("ShootingGame/Gun");
-            bgTextureShoot = Content.Load<Texture2D>("ShootingGame/Background");
-            stanceDuelTexture = Content.Load<Texture2D>("ShootingGame/stanceDuel");
+            gunTexture = Content.Load<Texture2D>("Shooting/pistol");
+            bgTextureShoot = Content.Load<Texture2D>("Shooting/duelBG");
+            stanceDuelTexture = Content.Load<Texture2D>("Shooting/pose");
 
             //boxing
             ringBg = Content.Load<Texture2D>("Boxing/boxingbg");
@@ -249,22 +272,22 @@ namespace Finalv2
             enemyBlockTexture = Content.Load<Texture2D>("Boxing/eblock");
             enemyHurtTexture = Content.Load<Texture2D>("Boxing/ehurt");
 
+            heartTexture = Content.Load<Texture2D>("Boxing/heart");
+            gloveTexture = Content.Load<Texture2D>("Boxing/stam");
+
+
 
 
             // TODO: use this.Content to load your game content here
         }
 
+
+        
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-            float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-
-
-
-
 
             base.Update(gameTime);
         }
@@ -275,7 +298,6 @@ namespace Finalv2
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
-
 
 
 
@@ -585,13 +607,73 @@ namespace Finalv2
         private void boxingLogic(GameTime gameTime)
         {
             float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-
             //keyboard, mouse, time
             KeyboardState keyboardstate = Keyboard.GetState();
             MouseState mousestate = Mouse.GetState();
+            MouseState prevMouseState;
+            prevMouseState = _mouseState;
+            _mouseState = Mouse.GetState();
+            var keyboardState = Keyboard.GetState();
+
+            bool justPressed = _mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton == ButtonState.Released;
+
+            if (hurtTimer > 0f)
+            {
+                hurtTimer -= gametime;
+                if (hurtTimer <= 0f)
+                    enemyHurt = false;
+            }
 
 
-            //enemy
+            //blocking
+            isBlocking = keyboardstate.IsKeyDown(Keys.Space) || mousestate.RightButton == ButtonState.Pressed;
+
+            //punching
+            if (actionTimer <= 0 && mousestate.LeftButton == ButtonState.Pressed && playerStamina > 0)
+            {
+                punchLeft = true;
+                actionTimer = actionCooldown;
+                //spend stamina
+                playerStamina--;
+                staminaRechargeTimer = 0f;
+            }
+
+            //recharge when blocking
+            if (isBlocking && playerStamina < maxPlayerStamina)
+            {
+                staminaRechargeTimer += gametime;
+                if (staminaRechargeTimer >= staminaRechargeDelay)
+                {
+                    playerStamina++;
+                    staminaRechargeTimer = 0f;
+                }
+            }
+            else if (!isBlocking)
+            {
+                staminaRechargeTimer = 0f;
+            }
+
+            //countering
+            if (!enemyWindingUp && !enemyPunching && !enemyHurt)
+            {
+
+                //crosshair need to be on enemy
+                var enemyCenter = windowSize / 2 + offset + new Vector2(enemyXOffset * drawScale, enemyYOffset * drawScale);
+                var tex = enemyPunchTexture;
+                var bounds = new Rectangle((int)(enemyCenter.X - tex.Width / 2 * drawScale), (int)(enemyCenter.Y - tex.Height / 2 * drawScale), (int)(tex.Width * drawScale), (int)(tex.Height * drawScale));
+
+                if (justPressed && bounds.Contains(_mouseState.X, _mouseState.Y) && rnd.NextDouble() < 0.7) //70 chance of hurting enemy
+                {
+                    enemyHurt = true;
+                    hurtTimer = hurtTime;
+                    enemyHealth = Math.Max(0, enemyHealth - 1);
+                    //make sure dont rehit
+                    guardCooldownTimer = postPunchGuardTime;
+                }
+                else enemyHurt = false;
+            }
+
+            bool inRange = scaleZoom >= punchRangeScale;
 
             //if scale is greater than 1.5, then enemy AI is active
             if (scaleZoom >= 1.5f)
@@ -602,6 +684,7 @@ namespace Finalv2
             //if enemy AI is active
             if (enemyAIActive)
             {
+
                 if (enemyActionTimer <= 0f)
                 {
                     //fake left and right
@@ -639,62 +722,71 @@ namespace Finalv2
                     enemyActionTimer -= (float)gameTime.ElapsedGameTime.TotalSeconds;
                 }
 
-                //ai will punch, block every 1.5 seconds
-                if (enemyActionTimer <= 0f)
+
+
+                //ai combat logic
+
+
+                bool enemyInRange = scaleZoom >= punchRangeScale;
+
+                if (guardCooldownTimer > 0f)
                 {
-                    int action = rnd.Next(1, 3); // 1 = punch, 2 = block
-                    if (action == 1)
+                    guardCooldownTimer -= gametime;
+                    enemyBlock = true;
+                    enemyWindingUp = enemyPunching = false;
+                }
+                else if (!inRange)
+                {
+                    //block if out of range
+                    enemyBlock = true;
+                    enemyWindingUp = enemyPunching = false;
+                }
+                else
+                {
+                    //a bit of warmup for user
+                    if (!enemyWindingUp && !enemyPunching)
                     {
-                        enemyPunch = true;
                         enemyBlock = false;
-                        enemyHurt = false;
+                        enemyWindingUp = true;
+                        punchTimer = punchWindupTime;
                     }
-                    else if (action == 2)
+                    else if (enemyWindingUp)
                     {
-                        enemyPunch = false;
-                        enemyBlock = true;
-                        enemyHurt = false;
+                        punchTimer -= gametime;
+                        if (punchTimer <= 0f)
+                        {
+                            enemyWindingUp = false;
+                            enemyPunching = true;
+                            punchTimer = punchHoldTime;
+
+                            //apply player damage
+                            if (!isBlocking) playerHealth--;
+                        }
+                    }
+
+                    else if (enemyPunching)
+                    {
+                        punchTimer -= gametime;
+
+                        if (punchTimer <= 0f)
+                        {
+                            enemyPunching = false;
+                            //after punch go into cooldown
+                            guardCooldownTimer = postPunchGuardTime;
+                        }
                     }
                 }
+
+                // reset punch when cooldown expires
+                if (actionTimer > 0) actionTimer -= gametime;
+                else punchLeft = false;
+
             }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            //blocking
-            isBlocking = keyboardstate.IsKeyDown(Keys.Space) || mousestate.RightButton == ButtonState.Pressed;
-
-            //punching
-            if (actionTimer <= 0 && mousestate.LeftButton == ButtonState.Pressed)
-            {
-                punchLeft = true;
-                actionTimer = actionCooldown;
-            }
-
-            // reset punch when cooldown expires
+            // reset punch
             if (actionTimer > 0) actionTimer -= gametime;
             else punchLeft = false;
-
-
-
-
-
-
-
-
-
 
 
             //scale
@@ -721,17 +813,14 @@ namespace Finalv2
             Vector2 maxOffset = new Vector2((drawnWidth - windowSize.X) / 2f, (drawnHeight - windowSize.Y) / 2f);
             offset = Vector2.Clamp(offset, -maxOffset, maxOffset);
 
-
-
-
-
-
         }
 
 
         //boxing draw
         private void boxingDraw()
         {
+
+
 
 
             //draw bg
@@ -742,14 +831,15 @@ namespace Finalv2
             //enemy
             Texture2D enemyToDraw;
 
-            if (enemyPunch)
+            if (enemyWindingUp)
+                enemyToDraw = enemyGuardTexture;
+            else if (enemyPunching)
                 enemyToDraw = enemyPunchTexture;
-            else if (enemyBlock)
-                enemyToDraw = enemyBlockTexture;
             else if (enemyHurt)
                 enemyToDraw = enemyHurtTexture;
             else
-                enemyToDraw = enemyGuardTexture;
+                enemyToDraw = enemyBlockTexture;
+
 
 
             //scaling
@@ -757,12 +847,11 @@ namespace Finalv2
             float enemyDrawScale = baseScale * enemyScaleOffset;
 
             Vector2 enemyDrawPos = windowSize / 2 + offset + new Vector2(enemyXOffset * drawScale, enemyYOffset * drawScale);
+            float redIntensity = 1f - (float)enemyHealth / maxEnemyHealth;
+            Color tint = Color.Lerp(Color.White, Color.Red, redIntensity);
 
-            _spriteBatch.Draw(enemyToDraw, enemyDrawPos, null, Color.White, 0f, new Vector2(enemyToDraw.Width / 2f, enemyToDraw.Height / 2f), enemyDrawScale, SpriteEffects.None, 0f);
 
-
-            //show enemy scale size
-            Window.Title = $"Scale: {drawScale:F2}";
+            _spriteBatch.Draw(enemyToDraw, enemyDrawPos, null, tint, 0f, new Vector2(enemyToDraw.Width / 2f, enemyToDraw.Height / 2f), enemyDrawScale, SpriteEffects.None, 0f);
 
 
 
@@ -775,11 +864,33 @@ namespace Finalv2
             else
                 fistToDraw = fistGuardTexture;
 
+
+
             _spriteBatch.Draw(fistToDraw, fistPosition, Color.White);
 
 
             //crosshair 
             _spriteBatch.Draw(crosshairTexture, new Vector2(windowSize.X / 2, windowSize.Y / 2), null, Color.White, 0f, new Vector2(crosshairTexture.Width / 2, crosshairTexture.Height / 2), 0.2f, SpriteEffects.None, 0f);
+
+            const int iconSpacing = 4;
+
+            // draw hearts
+            for (int i = 0; i < playerHealth; i++)
+            {
+                var pos = new Vector2(20 + i * ((heartTexture.Width * iconScale) + iconSpacing), 20
+                );
+                _spriteBatch.Draw(heartTexture, pos, null, Color.White, 0f, Vector2.Zero, iconScale, SpriteEffects.None, 0f
+                );
+            }
+
+            //draw gloves(stamina)
+            for (int i = 0; i < playerStamina; i++)
+            {
+                var pos = new Vector2(20 + i * ((gloveTexture.Width * iconScale) + iconSpacing), 20 + heartTexture.Height * iconScale + iconSpacing
+                );
+                _spriteBatch.Draw(gloveTexture, pos, null, Color.White, 0f, Vector2.Zero, iconScale, SpriteEffects.None, 0f);
+            }
+
 
         }
     }
