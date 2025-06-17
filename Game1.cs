@@ -286,8 +286,16 @@ namespace Finalv2
 
         protected override void Update(GameTime gameTime)
         {
+           float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+
+            //boxing game has an issue where even tho there's no stamaina the player can still do damage to the enemy
+            //also when the game start and we are far away we are still able to damage the enemy forever and there are no cool downs
+            //boxingLogic(gameTime);
+
 
             base.Update(gameTime);
         }
@@ -299,7 +307,7 @@ namespace Finalv2
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
-
+            boxingDraw();
 
             _spriteBatch.End();
 
@@ -607,6 +615,7 @@ namespace Finalv2
         private void boxingLogic(GameTime gameTime)
         {
             float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             //keyboard, mouse, time
             KeyboardState keyboardstate = Keyboard.GetState();
             MouseState mousestate = Mouse.GetState();
