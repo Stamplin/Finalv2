@@ -50,7 +50,7 @@ namespace Finalv2
 
         #region arm wrestling
         //import texture
-        Texture2D backgroundTexture, tempArm;
+        Texture2D backgroundTexture, tempArm, backgroundTableTexture, enemyArmW;
         //game variables
         float armRotation = 0.1f; //so the cool animation play and get it shaky
         float aiPushForce = 2f; //ai strength
@@ -81,7 +81,24 @@ namespace Finalv2
         //3 = normal
         //4 = angry
         //5 = very angry
+
         #endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         #region shooting game
         //shootingDuel variables
@@ -183,9 +200,8 @@ namespace Finalv2
         const float iconScale = 0.15f;
         float staminaRechargeTimer = 0f;
         const float staminaRechargeDelay = 1f;
-
-
-
+        float mouseHitCooldown = 0f;
+        const float mouseHitCooldownDuration = 0.5f;
 
 
 
@@ -250,9 +266,20 @@ namespace Finalv2
             //armwrestling
             backgroundTexture = Content.Load<Texture2D>("Arm/Background");
             tempArm = Content.Load<Texture2D>("Arm/Arm");
+            backgroundTableTexture = Content.Load<Texture2D>("Arm/BackgroundTable");
+            enemyArmW = Content.Load<Texture2D>("Arm/enemyArmW");
 
             //drinking game
             // will add later
+
+
+
+
+
+
+
+
+
 
             //shooting
             gunTexture = Content.Load<Texture2D>("Shooting/pistol");
@@ -287,14 +314,18 @@ namespace Finalv2
         protected override void Update(GameTime gameTime)
         {
            float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+           prevKeyboardState = keyboardState;
+           keyboardState = Keyboard.GetState();
 
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            armWrestlingLogic();
+            Window.Title = $"Arm Rotation: {armRotation:F2} | AI Force: {aiPushForce:F3}";
 
-            //boxing game has an issue where even tho there's no stamaina the player can still do damage to the enemy
-            //also when the game start and we are far away we are still able to damage the enemy forever and there are no cool downs
-            //boxingLogic(gameTime);
+
+
+
 
 
             base.Update(gameTime);
@@ -307,7 +338,24 @@ namespace Finalv2
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
-            boxingDraw();
+            armWrestlingDraw();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             _spriteBatch.End();
 
@@ -443,10 +491,28 @@ namespace Finalv2
         //arm wrestling minigame draw
         private void armWrestlingDraw()
         {
+            //draw bg
             _spriteBatch.Draw(backgroundTexture, new Rectangle(0, 0, 1280, 720), Color.White);
 
+            //enemy arm
+            float enemyArmRotationOffset = -0.1f; //slight offset
+            float enemyArmRotation = MathHelper.Clamp(armRotation * 0.4f + enemyArmRotationOffset, minRotation, maxRotation); //weaker effect
+
+            float enemyXOffset = 0f;
+            if (armRotation > 0.4f)
+            {
+                float shiftAmount = 450f; 
+                float t = (armRotation - 0.4f) / (maxRotation - 0.4f); 
+                enemyXOffset = MathHelper.Clamp(t * shiftAmount, 0f, shiftAmount);
+            }
+
+            _spriteBatch.Draw(enemyArmW, new Vector2(650 + enemyXOffset, 580), null, Color.White, enemyArmRotation, new Vector2(270, 480), 1.0f, SpriteEffects.FlipHorizontally, 0f);
+
+            // draw table on top of background/enemy arm
+            _spriteBatch.Draw(backgroundTableTexture, new Rectangle(0, 0, 1280, 720), Color.White);
+
             //draw arm and spin/roate it based on the armRotation variable
-            _spriteBatch.Draw(tempArm, new Vector2(700, 730), null, Color.White, armRotation, new Vector2(455, 505), 1.0f, SpriteEffects.None, 0f);
+            _spriteBatch.Draw(tempArm, new Vector2(700, 750), null, Color.White, armRotation, new Vector2(300, 490), 1.0f, SpriteEffects.None, 0f);
         }
 
 
@@ -632,6 +698,8 @@ namespace Finalv2
                 if (hurtTimer <= 0f)
                     enemyHurt = false;
             }
+            if (mouseHitCooldown > 0f)
+                mouseHitCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
 
             //blocking
@@ -671,14 +739,18 @@ namespace Finalv2
                 var tex = enemyPunchTexture;
                 var bounds = new Rectangle((int)(enemyCenter.X - tex.Width / 2 * drawScale), (int)(enemyCenter.Y - tex.Height / 2 * drawScale), (int)(tex.Width * drawScale), (int)(tex.Height * drawScale));
 
-                if (justPressed && bounds.Contains(_mouseState.X, _mouseState.Y) && rnd.NextDouble() < 0.7) //70 chance of hurting enemy
+                if (justPressed && bounds.Contains(_mouseState.X, _mouseState.Y) && playerStamina > 0 && rnd.NextDouble() < 0.7 && scaleZoom >= punchRangeScale)
                 {
                     enemyHurt = true;
                     hurtTimer = hurtTime;
                     enemyHealth = Math.Max(0, enemyHealth - 1);
-                    //make sure dont rehit
                     guardCooldownTimer = postPunchGuardTime;
+                    playerStamina--;
+                    staminaRechargeTimer = 0f;
+                    mouseHitCooldown = mouseHitCooldownDuration;
                 }
+
+
                 else enemyHurt = false;
             }
 
@@ -829,9 +901,6 @@ namespace Finalv2
         private void boxingDraw()
         {
 
-
-
-
             //draw bg
             _spriteBatch.Draw(ringBg, windowSize / 2 + offset, null, Color.White, 0, new(ringBg.Width / 2, ringBg.Height / 2), windowSize.Y / ringBg.Height * scaleZoom, SpriteEffects.None, 0f);
 
@@ -899,6 +968,9 @@ namespace Finalv2
                 );
                 _spriteBatch.Draw(gloveTexture, pos, null, Color.White, 0f, Vector2.Zero, iconScale, SpriteEffects.None, 0f);
             }
+
+
+
 
 
         }
