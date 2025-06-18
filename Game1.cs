@@ -59,7 +59,6 @@ namespace Finalv2
 
         const float minRotation = -0.39f; //left
         const float maxRotation = 1.5f;  //right
-        const float returnSpeed = 0.01f;  //speed at which the arm resets
         const float moveStep = 0.10f; //spacebar power
 
         bool aiActivated = false;
@@ -72,15 +71,20 @@ namespace Finalv2
         //better ai
         float aiPushForceADD = 0f;
         float aiPushForceTimer = 0f;
-        const float aiPushInterval = 1f; //AI push force every whatever seconds
 
-        //visuals player stuff
-        int angerLevel = 1;
-        //1 = scared
-        //2 = weak
-        //3 = normal
-        //4 = angry
-        //5 = very angry
+
+        //smoothening
+        float targetRotation = 0.4f; 
+        const float rotationLerpSpeed = 5f;
+
+        //ai help mechanics
+        bool eUsed = false;
+        bool eActive = false;       
+        float eTimer = 0f;             
+        const float eDuration = 2f;     
+        const float eAmount = 0.2f;
+        //set to 2 sec for now
+
 
         #endregion
 
@@ -320,7 +324,7 @@ namespace Finalv2
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            armWrestlingLogic();
+            armWrestlingLogic(gameTime);
             Window.Title = $"Arm Rotation: {armRotation:F2} | AI Force: {aiPushForce:F3}";
 
 
@@ -381,37 +385,44 @@ namespace Finalv2
 
 
         //arm wrestling minigame logic
-        private void armWrestlingLogic()
+        private void armWrestlingLogic(GameTime gameTime)
         {
+            float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            aiPushForceTimer += gametime;
+
+            //ai settings
+            const float aiPushInterval = 0.2f;
+
+            if (eActive)
+            {
+                eTimer -= gametime;
+                if (eTimer <= 0f)
+                {
+                    eActive = false;
+                }
+                else
+                {
+                    aiPushForce = 0.6f;
+                }
+            }
+
             //every second add +/- to the ai base stats
             if (aiPushForceTimer >= aiPushInterval)
             {
-                aiPushForceADD = rnd.Next(-1, 2) * 0.001f;
-                aiPushForce = Math.Clamp(aiPushForce + aiPushForceADD, 0.01f, 0.05f);
+                aiPushForceADD = rnd.Next(-1, 2) * 1.2f;
+                aiPushForce = Math.Clamp(aiPushForce + aiPushForceADD, 0.6f, 0.9f);
                 aiPushForceTimer = 0f;
             }
-
-            //anger level for visual
-            if (aiPushForce <= 0.011f)
-                angerLevel = 1; // Scared (Weak AI)
-            else if (aiPushForce <= 0.017f)
-                angerLevel = 2;
-            else if (aiPushForce <= 0.023f)
-                angerLevel = 3;
-            else if (aiPushForce <= 0.029f)
-                angerLevel = 4;
-            else
-                angerLevel = 5; // Angry (Strong AI)
-
 
             //reset - rematch
             if (keyboardState.IsKeyDown(Keys.R) && prevKeyboardState.IsKeyUp(Keys.R))
             {
-                armRotation = 0.4f;
+                armRotation = targetRotation = 0.4f;
                 isFrozen = false;
                 aiActivated = false;
                 gameWinStatus = 0;
-                aiPushForce = rnd.Next(1, 4) * 0.01f; //ai base stat reset every rematch
+                //set new match
+                aiPushForce = rnd.Next(2, 7) * 0.01f;
             }
             //if winstat 2 then it freezes
             if (gameWinStatus == 2)
@@ -425,67 +436,51 @@ namespace Finalv2
             //play need to press space
             if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
             {
-                armRotation -= moveStep;
+                targetRotation -= moveStep;
                 aiActivated = true;
             }
             //start only when the player is ready
-            if (aiActivated && armRotation < maxRotation)
+            if (aiActivated)
             {
-                armRotation += aiPushForce;
-            }
-
-            //every space press moves the arm to the left counterclockwise
-            if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
-            {
-                armRotation -= moveStep;
-            }
-
-            //rotate left (counterclockwise)
-            if (keyboardState.IsKeyDown(Keys.Left) && armRotation > minRotation)
-            {
-                armRotation -= 0.03f;
-            }
-
-            //rotate right (clockwise)
-            if (keyboardState.IsKeyDown(Keys.Right) && armRotation < maxRotation)
-            {
-                armRotation += 0.03f;
+                targetRotation += aiPushForce * gametime;
             }
 
             //prevent arm from exceeding min/max rotation
-            if (armRotation <= minRotation)
+            if (targetRotation <= minRotation)
             {
-                armRotation = minRotation;
                 isFrozen = true;
                 gameWinStatus = 1;
             }
-            else if (armRotation >= maxRotation)
+            else if (targetRotation >= maxRotation)
             {
-                armRotation = maxRotation;
+                isFrozen = true;
                 gameWinStatus = 2;
             }
 
+
+
             //taunt the ai to break it, make it weaker by pressing e
-            if (keyboardState.IsKeyDown(Keys.E) && prevKeyboardState.IsKeyUp(Keys.E))
+            if (!eUsed && keyboardState.IsKeyDown(Keys.E) && prevKeyboardState.IsKeyUp(Keys.E))
             {
-                aiPushForce = Math.Clamp(aiPushForce - 0.001f, 0.01f, 0.05f);
+                //2 sec start
+                eUsed = true;
+                eActive = true;
+                eTimer = eDuration;
 
+                //set to weaker ai
+                aiPushForce = 0.6f;
             }
 
-            if (aiActivated)
-                return;
-            //return to orginal pos
-            if (!keyboardState.IsKeyDown(Keys.Left) && !keyboardState.IsKeyDown(Keys.Right) & !(keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space)))
-            {
-                if (armRotation > 0.4f)
-                {
-                    armRotation -= returnSpeed;
-                }
-                else if (armRotation < 0.4f)
-                {
-                    armRotation += ((returnSpeed) / 2);
-                }
-            }
+
+            if (aiActivated);
+
+            //smooth rotation
+            armRotation = MathHelper.Lerp(armRotation,targetRotation,rotationLerpSpeed * gametime);
+            targetRotation = MathHelper.Clamp(targetRotation, minRotation, maxRotation);
+
+            Window.Title =
+              $"ARM {armRotation:F2} ▶ TGT {targetRotation:F2} │ AI {aiPushForce:F3}";
+
         }
 
         //arm wrestling minigame draw
