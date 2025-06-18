@@ -20,7 +20,9 @@ namespace Finalv2
         Random rnd = new Random();
 
         #region drinking game
-        //drink variables
+        //textures
+        Texture2D bgDrink, bgNotDrink;
+        Texture2D leftArrow, rightArrow, upArrow, downArrow;
 
         //combo varible 
         int comboOne;
@@ -31,7 +33,6 @@ namespace Finalv2
         int inputOne;
         int inputTwo;
         int inputThree;
-
 
         //bools
         bool drinkingGameComplete = false;
@@ -129,7 +130,6 @@ namespace Finalv2
 
         //textures
         Texture2D ringBg;
-        Texture2D fistTexture;
         Texture2D crosshairTexture;
 
         Texture2D fistGuardTexture;
@@ -183,7 +183,6 @@ namespace Finalv2
         const float punchWindupTime = 0.5f;   
         const float punchHoldTime = 0.5f;
         float punchTimer = 0f;     
-        bool enemyInRange = false;
         bool enemyWindingUp = false; 
         bool enemyPunching = false;
         float hurtTimer = 0f;
@@ -193,7 +192,6 @@ namespace Finalv2
 
         //for guard cooldown before/after punch
         const float postPunchGuardTime = 1f;
-        const float prePunchGuardTime = 1f;
         float guardCooldownTimer = 0f;
 
         //health and stamina
@@ -274,15 +272,13 @@ namespace Finalv2
             enemyArmW = Content.Load<Texture2D>("Arm/enemyArmW");
 
             //drinking game
-            // will add later
+            bgDrink = Content.Load<Texture2D>("Drinking/drinking");
+            bgNotDrink = Content.Load<Texture2D>("Drinking/nodrink");
 
-
-
-
-
-
-
-
+            leftArrow = Content.Load<Texture2D>("Drinking/arrow_left");
+            rightArrow = Content.Load<Texture2D>("Drinking/arrow_right");
+            upArrow = Content.Load<Texture2D>("Drinking/arrow_up");
+            downArrow = Content.Load<Texture2D>("Drinking/arrow_down");
 
 
             //shooting
@@ -324,8 +320,7 @@ namespace Finalv2
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            armWrestlingLogic(gameTime);
-            Window.Title = $"Arm Rotation: {armRotation:F2} | AI Force: {aiPushForce:F3}";
+            drinkingGameLogic();
 
 
 
@@ -341,21 +336,6 @@ namespace Finalv2
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
-
-            armWrestlingDraw();
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -477,9 +457,6 @@ namespace Finalv2
             //smooth rotation
             armRotation = MathHelper.Lerp(armRotation,targetRotation,rotationLerpSpeed * gametime);
             targetRotation = MathHelper.Clamp(targetRotation, minRotation, maxRotation);
-
-            Window.Title =
-              $"ARM {armRotation:F2} ▶ TGT {targetRotation:F2} │ AI {aiPushForce:F3}";
 
         }
 
@@ -623,6 +600,12 @@ namespace Finalv2
                 displayMessage = $"Target: {targetComboStr} | You: {playerAttemptStr}";
             }
             Window.Title = displayMessage;
+        }
+
+        //drinking game draw
+        private void drinkingGameDraw()
+        {
+            _spriteBatch.Draw(bgNotDrink, new Rectangle(0, 0, 800, 600), Color.White);
         }
 
         //arrow key conversion for UI for now will switch later
