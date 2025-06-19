@@ -33,12 +33,28 @@ namespace Finalv2
 
         Texture2D menuTexture;
         SoundEffect menuVoice;
-        SoundEffectInstance mneuVoiceInstance;
+        SoundEffectInstance menuVoiceInstance;
+        bool menuVoicePlayed = false;
 
+        //sound played
 
-        
+        SoundEffect armWrestlingVoice;
+        SoundEffect boxingVoice;
+        SoundEffect drinkingGameVoice;
+        SoundEffect finalGameVoice;
+        SoundEffect winscreenVoice;
+        SoundEffect losescreenVoice;
+        SoundEffect againScreenVoice;
 
+        bool armWrestlingVoicePlayed = false;
+        bool boxingVoicePlayed = false;
+        bool drinkingGameVoicePlayed = false;
+        bool finalGameVoicePlayed = false;
+        bool winscreenVoicePlayed = false;
+        bool losescreenVoicePlayed = false;
+        bool againScreenVoicePlayed = false;
 
+        SoundEffectInstance armWrestlingVoiceInstance, boxingVoiceInstance, drinkingGameVoiceInstance, finalGameVoiceInstance, winscreenVoiceInstance, losescreenVoiceInstance, againScreenVoiceInstance;
 
 
 
@@ -78,7 +94,6 @@ namespace Finalv2
 
 
         #endregion
-
         #region arm wrestling
         //import texture
         Texture2D backgroundTexture, tempArm, backgroundTableTexture, enemyArmW;
@@ -118,23 +133,6 @@ namespace Finalv2
 
 
         #endregion
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         #region shooting game
         //shootingDuel variables
 
@@ -148,14 +146,6 @@ namespace Finalv2
 
 
         #endregion
-
-
-
-
-
-
-
-
         #region boxing game
 
         //textures
@@ -240,27 +230,6 @@ namespace Finalv2
 
 
         #endregion
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -340,6 +309,24 @@ namespace Finalv2
             //screens and sounds
             menuTexture = Content.Load<Texture2D>("screen/menu");
             menuVoice = Content.Load<SoundEffect>("sound/intro");
+            menuVoiceInstance = menuVoice.CreateInstance();
+
+            armWrestlingVoice = Content.Load<SoundEffect>("sound/armwrestle");
+            boxingVoice = Content.Load<SoundEffect>("sound/boxing");
+            drinkingGameVoice = Content.Load<SoundEffect>("sound/drinking");
+            //finalGameVoice = Content.Load<SoundEffect>("sound/shooting");
+            winscreenVoice = Content.Load<SoundEffect>("sound/win");
+            losescreenVoice = Content.Load<SoundEffect>("sound/lose");
+            againScreenVoice = Content.Load<SoundEffect>("sound/again");
+
+            armWrestlingVoiceInstance = armWrestlingVoice.CreateInstance();
+            boxingVoiceInstance = boxingVoice.CreateInstance();
+            drinkingGameVoiceInstance = drinkingGameVoice.CreateInstance();
+            //finalGameVoiceInstance = finalGameVoice.CreateInstance();
+            winscreenVoiceInstance = winscreenVoice.CreateInstance();
+            losescreenVoiceInstance = losescreenVoice.CreateInstance();
+            againScreenVoiceInstance = againScreenVoice.CreateInstance();
+
 
 
 
@@ -348,7 +335,7 @@ namespace Finalv2
         }
 
 
-        
+
 
         protected override void Update(GameTime gameTime)
         {
@@ -356,47 +343,90 @@ namespace Finalv2
            prevKeyboardState = keyboardState;
            keyboardState = Keyboard.GetState();
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            if (currentScreen == 0)
+            {
+                //if esc is pressed
+                if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape))
+                {
+                    Exit();
+                }
 
-            //boxingLogic(gameTime);
+            }
+            else if (currentScreen != 0)
+            {
+                if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape))
+                {
+                    currentScreen = 0;
+                    againScreenVoiceInstance.Play();
+
+                }
+
+            }
 
 
-            //win status
-            Window.Title = $"{gameWinStatus}";
-            
+            //play once
+            if (!menuVoicePlayed && currentScreen == 0)
+            {
+                menuVoiceInstance.Play();
+                menuVoicePlayed = true;
+            }
+            if (currentScreen != Screen.Menu && menuVoiceInstance.State == SoundState.Playing)
+            {
+                menuVoiceInstance.Stop();
+
+            }
+
+            //stop playing again sound if not in menu
+            if (currentScreen != Screen.Menu && againScreenVoiceInstance.State == SoundState.Playing)
+            {
+                againScreenVoiceInstance.Stop();
+            }
+
+            //stop all other sound
+            if (currentScreen == Screen.Menu)
+            {
+                armWrestlingVoiceInstance.Stop();
+                boxingVoiceInstance.Stop();
+                drinkingGameVoiceInstance.Stop();
+                //finalGameVoiceInstance.Stop();
+                winscreenVoiceInstance.Stop();
+                losescreenVoiceInstance.Stop();
+            }
+
+
+
+
+
             //if current screen is menu
             if (currentScreen == 0)
             {
-                //if space is pressed
-                if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
-                {
-                    menuVoice.Play();
-                }
-
 
                 //if 1 is pressed
                 if (keyboardState.IsKeyDown(Keys.D1) && prevKeyboardState.IsKeyUp(Keys.D1))
                 {
                     currentScreen = Screen.drinkingGame;
+                    
                 }
 
                 //if 2 is pressed
                 if (keyboardState.IsKeyDown(Keys.D2) && prevKeyboardState.IsKeyUp(Keys.D2))
                 {
                     currentScreen = Screen.armWrestling;
+                    
                 }
 
                 //if 3 is pressed
                 if (keyboardState.IsKeyDown(Keys.D3) && prevKeyboardState.IsKeyUp(Keys.D3))
                 {
                     currentScreen = Screen.boxing;
+                    
                 }
 
                 //if 4 is pressed
                 if (keyboardState.IsKeyDown(Keys.D4) && prevKeyboardState.IsKeyUp(Keys.D4))
                 {
                     //currentScreen = Screen.shooting;
+                    
                 }
 
             }
@@ -404,18 +434,72 @@ namespace Finalv2
             //if current screen is arm wrestling
             if (currentScreen == Screen.armWrestling)
             {
+                //play once
+                if (!armWrestlingVoicePlayed)
+                {
+                    armWrestlingVoiceInstance.Play();
+                    armWrestlingVoicePlayed = true;
+                }
+                //stop play if input is detected
+                if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+                {
+                    if (armWrestlingVoiceInstance.State == SoundState.Playing)
+                        armWrestlingVoiceInstance.Stop();
+                }
+                //replay if missed
+                if (keyboardState.IsKeyDown(Keys.H) && prevKeyboardState.IsKeyUp(Keys.H))
+                {
+                    armWrestlingVoicePlayed = false;
+                }
+
                 armWrestlingLogic(gameTime);
             }
 
             //if current screen is drinking game
             if (currentScreen == Screen.drinkingGame)
             {
+                //play once
+                if (!drinkingGameVoicePlayed)
+                {
+                    drinkingGameVoiceInstance.Play();
+                    drinkingGameVoicePlayed = true;
+                }
+                //stop play if input is detected
+                if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+                {
+                    if (drinkingGameVoiceInstance.State == SoundState.Playing)
+                        drinkingGameVoiceInstance.Stop();
+                }
+                //replay if missed
+                if (keyboardState.IsKeyDown(Keys.H) && prevKeyboardState.IsKeyUp(Keys.H))
+                {
+                    drinkingGameVoicePlayed = false;
+                }
+
                 drinkingGameLogic();
             }
 
             //if current screen is boxing
             if (currentScreen == Screen.boxing)
             {
+                //play once
+                if (!boxingVoicePlayed)
+                {
+                    boxingVoiceInstance.Play();
+                    boxingVoicePlayed = true;
+                }
+                //stop play if input is detected
+                if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+                {
+                    if (boxingVoiceInstance.State == SoundState.Playing)
+                        boxingVoiceInstance.Stop();
+                }
+                //replay if missed
+                if (keyboardState.IsKeyDown(Keys.H) && prevKeyboardState.IsKeyUp(Keys.H))
+                {
+                    boxingVoicePlayed = false;
+                }
+
                 boxingLogic(gameTime);
             }
 
@@ -463,7 +547,7 @@ namespace Finalv2
 
             if (currentScreen == 0)
             {
-                _spriteBatch.Draw(menuTexture, new Vector2(0, 0), Color.White);
+                _spriteBatch.Draw(menuTexture, new Rectangle(0, 0, 1280, 720), Color.White);
             }            
 
             //if current screen is arm wrestling
