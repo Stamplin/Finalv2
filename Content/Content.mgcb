@@ -265,6 +265,18 @@
 /processorParam:TextureFormat=Color
 /build:Drinking/nodrink.png
 
+#begin screen/menu.jpg
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:screen/menu.jpg
+
 #begin Shooting/duelBG.webp
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -300,4 +312,10 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Shooting/pose.png
+
+#begin sound/intro.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sound/intro.mp3
 

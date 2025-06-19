@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -15,6 +16,35 @@ namespace Finalv2
         KeyboardState _keyboardState;
 
         Vector2 windowSize = new (1280, 720);
+
+        //screens
+        enum Screen 
+        {
+            Menu  ,
+            drinkingGame,
+            armWrestling,
+            boxing ,
+            finalGame,
+
+            winscreen,
+            losescreen 
+
+        };
+
+        Texture2D menuTexture;
+        SoundEffect menuVoice;
+        SoundEffectInstance mneuVoiceInstance;
+
+
+        
+
+
+
+
+
+
+
+        Screen currentScreen ;
 
         //random number generator
         Random rnd = new Random();
@@ -221,7 +251,7 @@ namespace Finalv2
 
 
 
-
+        
 
 
 
@@ -256,6 +286,11 @@ namespace Finalv2
             enemyPosition = new Vector2(windowSize.X / 2 + 200, windowSize.Y / 2);
             enemyActionTimer = enemyActionCooldown;
             enemyHealth = maxEnemyHealth;
+
+            //current screen
+            currentScreen = 0;
+            
+
 
             base.Initialize();
         }
@@ -302,6 +337,10 @@ namespace Finalv2
             heartTexture = Content.Load<Texture2D>("Boxing/heart");
             gloveTexture = Content.Load<Texture2D>("Boxing/stam");
 
+            //screens and sounds
+            menuTexture = Content.Load<Texture2D>("screen/menu");
+            menuVoice = Content.Load<SoundEffect>("sound/intro");
+
 
 
 
@@ -320,7 +359,87 @@ namespace Finalv2
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            drinkingGameLogic();
+            //boxingLogic(gameTime);
+
+
+            //win status
+            Window.Title = $"{gameWinStatus}";
+            
+            //if current screen is menu
+            if (currentScreen == 0)
+            {
+                //if space is pressed
+                if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+                {
+                    menuVoice.Play();
+                }
+
+
+                //if 1 is pressed
+                if (keyboardState.IsKeyDown(Keys.D1) && prevKeyboardState.IsKeyUp(Keys.D1))
+                {
+                    currentScreen = Screen.drinkingGame;
+                }
+
+                //if 2 is pressed
+                if (keyboardState.IsKeyDown(Keys.D2) && prevKeyboardState.IsKeyUp(Keys.D2))
+                {
+                    currentScreen = Screen.armWrestling;
+                }
+
+                //if 3 is pressed
+                if (keyboardState.IsKeyDown(Keys.D3) && prevKeyboardState.IsKeyUp(Keys.D3))
+                {
+                    currentScreen = Screen.boxing;
+                }
+
+                //if 4 is pressed
+                if (keyboardState.IsKeyDown(Keys.D4) && prevKeyboardState.IsKeyUp(Keys.D4))
+                {
+                    //currentScreen = Screen.shooting;
+                }
+
+            }
+
+            //if current screen is arm wrestling
+            if (currentScreen == Screen.armWrestling)
+            {
+                armWrestlingLogic(gameTime);
+            }
+
+            //if current screen is drinking game
+            if (currentScreen == Screen.drinkingGame)
+            {
+                drinkingGameLogic();
+            }
+
+            //if current screen is boxing
+            if (currentScreen == Screen.boxing)
+            {
+                boxingLogic(gameTime);
+            }
+
+
+
+
+
+
+
+
+
+
+
+            
+            
+            
+            //note to self:
+            //1) do enum and make a screen and publish
+            //2) finish editng the doc for the duel alternative game like got potato game
+            //3) finish the drinking game
+            //4) finish final game if have time
+            //5) do sounds for the game or atlweast add music (MAKE A PLAYLIST old wild west theme prob)
+
+            //armWrestlingLogic(gameTime);
 
 
 
@@ -335,10 +454,35 @@ namespace Finalv2
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+
             _spriteBatch.Begin();
 
 
+            //boxingDraw();
+            //armWrestlingDraw();
 
+            if (currentScreen == 0)
+            {
+                _spriteBatch.Draw(menuTexture, new Vector2(0, 0), Color.White);
+            }            
+
+            //if current screen is arm wrestling
+            if (currentScreen == Screen.armWrestling)
+            {
+                armWrestlingDraw();
+            }
+
+            //if current screen is drinking game
+            if (currentScreen == Screen.drinkingGame)
+            {
+                drinkingGameDraw();
+            }
+
+            //if current screen is boxing
+            if (currentScreen == Screen.boxing)
+            {
+                boxingDraw();
+            }
 
 
             _spriteBatch.End();
@@ -450,9 +594,6 @@ namespace Finalv2
                 //set to weaker ai
                 aiPushForce = 0.6f;
             }
-
-
-            if (aiActivated);
 
             //smooth rotation
             armRotation = MathHelper.Lerp(armRotation,targetRotation,rotationLerpSpeed * gametime);
