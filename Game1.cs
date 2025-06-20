@@ -69,7 +69,7 @@ namespace Finalv2
 
         //variables
         float bottleRotation = 0f;
-
+        int pointingWin = 0;
 
 
 
@@ -603,9 +603,17 @@ namespace Finalv2
 
 
 
+
+
+
         //drinking game
         private void drinkingGameLogic(GameTime gameTime)
         {
+            //3 point at user
+            //6 point at enemy
+
+
+
             //if space is pressed spin bottle
             if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
             {
