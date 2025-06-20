@@ -23,8 +23,7 @@ namespace Finalv2
             Menu  ,
             drinkingGame,
             armWrestling,
-            boxing ,
-            finalGame,
+            boxing,
 
             winscreen,
             losescreen 
@@ -41,7 +40,6 @@ namespace Finalv2
         SoundEffect armWrestlingVoice;
         SoundEffect boxingVoice;
         SoundEffect drinkingGameVoice;
-        SoundEffect finalGameVoice;
         SoundEffect winscreenVoice;
         SoundEffect losescreenVoice;
         SoundEffect againScreenVoice;
@@ -49,12 +47,11 @@ namespace Finalv2
         bool armWrestlingVoicePlayed = false;
         bool boxingVoicePlayed = false;
         bool drinkingGameVoicePlayed = false;
-        bool finalGameVoicePlayed = false;
         bool winscreenVoicePlayed = false;
         bool losescreenVoicePlayed = false;
         bool againScreenVoicePlayed = false;
 
-        SoundEffectInstance armWrestlingVoiceInstance, boxingVoiceInstance, drinkingGameVoiceInstance, finalGameVoiceInstance, winscreenVoiceInstance, losescreenVoiceInstance, againScreenVoiceInstance;
+        SoundEffectInstance armWrestlingVoiceInstance, boxingVoiceInstance, drinkingGameVoiceInstance, winscreenVoiceInstance, losescreenVoiceInstance, againScreenVoiceInstance;
 
 
 
@@ -66,26 +63,13 @@ namespace Finalv2
         Random rnd = new Random();
 
         #region drinking game
+
         //textures
-        Texture2D bgDrink, bgNotDrink;
-        Texture2D leftArrow, rightArrow, upArrow, downArrow;
+        Texture2D bgDrinkTexture, bottleTexture;
 
-        //combo varible 
-        int comboOne;
-        int comboTwo;
-        int comboThree;
+        //variables
+        float bottleRotation = 0f;
 
-        //combo input
-        int inputOne;
-        int inputTwo;
-        int inputThree;
-
-        //bools
-        bool drinkingGameComplete = false;
-
-        bool inputOneComplete = false;
-        bool inputTwoComplete = false;
-        bool inputThreeComplete = false;
 
 
 
@@ -94,6 +78,14 @@ namespace Finalv2
 
 
         #endregion
+
+
+
+
+
+
+
+
         #region arm wrestling
         //import texture
         Texture2D backgroundTexture, tempArm, backgroundTableTexture, enemyArmW;
@@ -237,6 +229,15 @@ namespace Finalv2
             IsMouseVisible = false;
         }
 
+
+
+
+
+
+
+
+
+
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
@@ -260,9 +261,28 @@ namespace Finalv2
             currentScreen = 0;
             
 
-
             base.Initialize();
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         protected override void LoadContent()
         {
@@ -276,19 +296,14 @@ namespace Finalv2
             enemyArmW = Content.Load<Texture2D>("Arm/enemyArmW");
 
             //drinking game
-            bgDrink = Content.Load<Texture2D>("Drinking/drinking");
-            bgNotDrink = Content.Load<Texture2D>("Drinking/nodrink");
-
-            leftArrow = Content.Load<Texture2D>("Drinking/arrow_left");
-            rightArrow = Content.Load<Texture2D>("Drinking/arrow_right");
-            upArrow = Content.Load<Texture2D>("Drinking/arrow_up");
-            downArrow = Content.Load<Texture2D>("Drinking/arrow_down");
+            bgDrinkTexture= Content.Load<Texture2D>("Drinking/bg");
+            bottleTexture = Content.Load<Texture2D>("Drinking/bottle"); 
 
 
-            //shooting
-            gunTexture = Content.Load<Texture2D>("Shooting/pistol");
-            bgTextureShoot = Content.Load<Texture2D>("Shooting/duelBG");
-            stanceDuelTexture = Content.Load<Texture2D>("Shooting/pose");
+
+
+
+
 
             //boxing
             ringBg = Content.Load<Texture2D>("Boxing/boxingbg");
@@ -306,6 +321,9 @@ namespace Finalv2
             heartTexture = Content.Load<Texture2D>("Boxing/heart");
             gloveTexture = Content.Load<Texture2D>("Boxing/stam");
 
+
+
+
             //screens and sounds
             menuTexture = Content.Load<Texture2D>("screen/menu");
             menuVoice = Content.Load<SoundEffect>("sound/intro");
@@ -313,16 +331,23 @@ namespace Finalv2
 
             armWrestlingVoice = Content.Load<SoundEffect>("sound/armwrestle");
             boxingVoice = Content.Load<SoundEffect>("sound/boxing");
+
+
             drinkingGameVoice = Content.Load<SoundEffect>("sound/drinking");
-            //finalGameVoice = Content.Load<SoundEffect>("sound/shooting");
+
+
             winscreenVoice = Content.Load<SoundEffect>("sound/win");
             losescreenVoice = Content.Load<SoundEffect>("sound/lose");
             againScreenVoice = Content.Load<SoundEffect>("sound/again");
 
             armWrestlingVoiceInstance = armWrestlingVoice.CreateInstance();
             boxingVoiceInstance = boxingVoice.CreateInstance();
+
+
             drinkingGameVoiceInstance = drinkingGameVoice.CreateInstance();
-            //finalGameVoiceInstance = finalGameVoice.CreateInstance();
+ 
+
+
             winscreenVoiceInstance = winscreenVoice.CreateInstance();
             losescreenVoiceInstance = losescreenVoice.CreateInstance();
             againScreenVoiceInstance = againScreenVoice.CreateInstance();
@@ -333,6 +358,27 @@ namespace Finalv2
 
             // TODO: use this.Content to load your game content here
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -388,7 +434,6 @@ namespace Finalv2
                 armWrestlingVoiceInstance.Stop();
                 boxingVoiceInstance.Stop();
                 drinkingGameVoiceInstance.Stop();
-                //finalGameVoiceInstance.Stop();
                 winscreenVoiceInstance.Stop();
                 losescreenVoiceInstance.Stop();
             }
@@ -419,13 +464,6 @@ namespace Finalv2
                 if (keyboardState.IsKeyDown(Keys.D3) && prevKeyboardState.IsKeyUp(Keys.D3))
                 {
                     currentScreen = Screen.boxing;
-                    
-                }
-
-                //if 4 is pressed
-                if (keyboardState.IsKeyDown(Keys.D4) && prevKeyboardState.IsKeyUp(Keys.D4))
-                {
-                    //currentScreen = Screen.shooting;
                     
                 }
 
@@ -476,7 +514,7 @@ namespace Finalv2
                     drinkingGameVoicePlayed = false;
                 }
 
-                drinkingGameLogic();
+                drinkingGameLogic(gameTime);
             }
 
             //if current screen is boxing
@@ -507,6 +545,19 @@ namespace Finalv2
             
             base.Update(gameTime);
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         protected override void Draw(GameTime gameTime)
         {
@@ -545,6 +596,64 @@ namespace Finalv2
 
             base.Draw(gameTime);
         }
+
+
+
+
+
+
+
+        //drinking game
+        private void drinkingGameLogic(GameTime gameTime)
+        {
+            //if space is pressed spin bottle
+            if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+            {
+                bottleRotation += 6f;
+            }
+
+            //if bottle roation not 0 wait
+            if (bottleRotation > 0)
+            {
+                bottleRotation -= 0.03f;
+            }
+
+            //windowtitle
+            Window.Title = bottleRotation.ToString();
+
+
+        }
+
+
+        //drinking game draw
+        private void drinkingGameDraw()
+        {
+            //draw bg
+            _spriteBatch.Draw(bgDrinkTexture, new Rectangle(0, 0, 1280, 720), Color.White);
+
+            //draw bottle in the center
+            _spriteBatch.Draw(bottleTexture, new Vector2(1280/2, 720/2), null, Color.White, bottleRotation, new Vector2(130, 290), 1.0f, SpriteEffects.None, 0f);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -686,45 +795,6 @@ namespace Finalv2
 
 
 
-
-
-
-
-        //drinking game
-        private void drinkingGameLogic()
-        {
-
-           
-        }
-
-            
-        //drinking game draw
-        private void drinkingGameDraw()
-        {
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //shooting game
-        private void shootingLogic()
-        {
-        }
-
-        //shooting game draw
-        private void shootingDraw()
-        {
-        }
 
 
 
