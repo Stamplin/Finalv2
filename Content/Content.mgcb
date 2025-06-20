@@ -241,6 +241,18 @@
 /processorParam:TextureFormat=Color
 /build:Drinking/arrow_up.png
 
+#begin Drinking/beerICON.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Drinking/beerICON.png
+
 #begin Drinking/drinking.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -252,6 +264,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Drinking/drinking.png
+
+#begin Drinking/drinkingPOV.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Drinking/drinkingPOV.png
 
 #begin Drinking/nodrink.png
 /importer:TextureImporter
