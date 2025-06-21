@@ -91,8 +91,9 @@ namespace Finalv2
 
 
 
-
-
+        //space spam issue arm wreslting
+        const float screenEntryDelay = 1.5f;
+        float screenEntryTimer = 0f;
 
 
 
@@ -183,6 +184,7 @@ namespace Finalv2
 
 
         //variables
+        bool eAbilityUsed = false;
         Vector2 fistPosition;
         bool isBlocking;
         bool punchLeft;
@@ -335,12 +337,6 @@ namespace Finalv2
             bgDrinkTexture= Content.Load<Texture2D>("Drinking/bg");
             bottleTexture = Content.Load<Texture2D>("Drinking/bottle"); 
 
-
-
-
-
-
-
             //boxing
             ringBg = Content.Load<Texture2D>("Boxing/boxingbg");
             crosshairTexture = Content.Load<Texture2D>("Boxing/crosshair");
@@ -358,12 +354,15 @@ namespace Finalv2
             gloveTexture = Content.Load<Texture2D>("Boxing/stam");
 
 
-
+            //win/lose screen
+            winScreenTexture = Content.Load<Texture2D>("screen/win");
+            loseScreenTexture = Content.Load<Texture2D>("screen/lose");
 
             //screens and sounds
             menuTexture = Content.Load<Texture2D>("screen/menu");
             menuVoice = Content.Load<SoundEffect>("sound/intro");
             menuVoiceInstance = menuVoice.CreateInstance();
+            
 
             armWrestlingVoice = Content.Load<SoundEffect>("sound/armwrestle");
             boxingVoice = Content.Load<SoundEffect>("sound/boxing");
@@ -466,15 +465,20 @@ namespace Finalv2
             //sound effects volume
             punchSoundInstance.Volume = 0.1f;
             hurtSoundInstance.Volume = 0.5f;
-            insultSoundInstance.Volume = 0.2f;
+            insultSoundInstance.Volume = 0.8f;
             gruntSoundInstance.Volume = 0.2f;
 
             introMusicInstance.IsLooped = true;
             armWrestlingMusicInstance.IsLooped = true;
             boxingMusicInstance.IsLooped = true;
             drinkingGameMusicInstance.IsLooped = true;
+            gruntSoundInstance.IsLooped = true;
 
-
+            //spam fix
+            if (screenEntryTimer > 0)
+            {
+                screenEntryTimer -= gametime;
+            }
 
 
             if (currentScreen == 0)
@@ -484,6 +488,7 @@ namespace Finalv2
                 drinkingGameMusicInstance.Stop();
                 armWrestlingMusicInstance.Stop();
                 boxingMusicInstance.Stop();
+                gruntSoundInstance.Stop();
 
 
                 //if esc is pressed
@@ -672,6 +677,8 @@ namespace Finalv2
             //win screen 
             if (currentScreen == Screen.winscreen)
             {
+                winscreenVoiceInstance.Play();
+
                 //play once
                 if (!winscreenVoicePlayed)
                 {
@@ -679,12 +686,14 @@ namespace Finalv2
                     winscreenVoicePlayed = true;
                     Window.Title = "Wildout West - You won! (space to return to menu)";
                 }
-                //stop play if input is detected
-                if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+                //space return to menu
+                if (screenEntryTimer <= 0 && keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
                 {
                     currentScreen = Screen.Menu;
                     winscreenVoiceInstance.Stop();
                     againScreenVoiceInstance.Play();
+                    winscreenVoicePlayed = true;
+                    Window.Title = "Wildout West - Menu (press 1, 2 or 3 to play)";
                 }
 
             }
@@ -692,19 +701,22 @@ namespace Finalv2
             //lose screen
             if (currentScreen == Screen.losescreen)
             {
+                losescreenVoiceInstance.Play();
+
                 //play once
                 if (!losescreenVoicePlayed)
                 {
-                    losescreenVoiceInstance.Play();
                     losescreenVoicePlayed = true;
                     Window.Title = "Wildout West - You lost! (space to return to menu)";
                 }
                 //space return to menu
-                if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+                if (screenEntryTimer <= 0 && keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
                 {
                     currentScreen = Screen.Menu;
                     losescreenVoiceInstance.Stop();
                     againScreenVoiceInstance.Play();
+                    losescreenVoicePlayed = true;
+                    Window.Title = "Wildout West - Menu (press 1, 2 or 3 to play)";
 
                 }
             }
@@ -755,6 +767,18 @@ namespace Finalv2
             if (currentScreen == Screen.boxing)
             {
                 boxingDraw();
+            }
+
+            //if current screen is win screen
+            if (currentScreen == Screen.winscreen)
+            {
+                _spriteBatch.Draw(winScreenTexture, new Rectangle(0, 0, 1280, 720), Color.White);
+            }
+
+            //if current screen is lose screen
+            if (currentScreen == Screen.losescreen)
+            {
+                _spriteBatch.Draw(loseScreenTexture, new Rectangle(0, 0, 1280, 720), Color.White);
             }
 
 
@@ -949,6 +973,57 @@ namespace Finalv2
             float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
             aiPushForceTimer += gametime;
 
+            if (!eAbilityUsed && keyboardState.IsKeyDown(Keys.E) && prevKeyboardState.IsKeyUp(Keys.E))
+            {
+                eAbilityUsed = true;
+            }
+
+            //window title with E ablity
+            string eStatus = eAbilityUsed ? "USED" : "READY";
+            Window.Title = $"Wildout West - Arm Wrestling (esc to return/'H' for help) | " + $"E to weaken AI: {eStatus} | Press Space to push!";
+
+
+            //if winstatus = 2 lose
+            if (gameWinStatus == 2)
+            {
+                //stop the music
+                armWrestlingMusicInstance.Stop();
+                gruntSoundInstance.Stop();
+                currentScreen = Screen.losescreen;
+                screenEntryTimer = screenEntryDelay;
+                gameWinStatus = 0; //reset win status for next match
+                eAbilityUsed = false;
+
+
+                //reset
+                armRotation = targetRotation = 0.4f;
+                isFrozen = false;
+                aiActivated = false;
+                gameWinStatus = 0;
+                //set new match
+                aiPushForce = rnd.Next(2, 7) * 0.01f;
+                eAbilityUsed = false;
+
+            }
+            //if winstatus = 1 win
+            if (gameWinStatus == 1)
+            {
+                //stop the music
+                armWrestlingMusicInstance.Stop();
+                gruntSoundInstance.Stop();
+                currentScreen = Screen.winscreen;
+                screenEntryTimer = screenEntryDelay;
+                gameWinStatus = 0; //reset win status for next match
+
+                //reset
+                armRotation = targetRotation = 0.4f;
+                isFrozen = false;
+                aiActivated = false;
+                gameWinStatus = 0;
+                //set new match
+                aiPushForce = rnd.Next(2, 7) * 0.01f;
+            }
+
             //ai settings
             const float aiPushInterval = 0.2f;
 
@@ -958,6 +1033,7 @@ namespace Finalv2
                 if (eTimer <= 0f)
                 {
                     eActive = false;
+                    hurtSoundInstance.Play();
                 }
                 else
                 {
@@ -1002,6 +1078,7 @@ namespace Finalv2
             if (aiActivated)
             {
                 targetRotation += aiPushForce * gametime;
+                gruntSoundInstance.Play();
             }
 
             //prevent arm from exceeding min/max rotation
@@ -1025,6 +1102,7 @@ namespace Finalv2
                 eUsed = true;
                 eActive = true;
                 eTimer = eDuration;
+                insultSoundInstance.Play();
 
                 //set to weaker ai
                 aiPushForce = 0.6f;
