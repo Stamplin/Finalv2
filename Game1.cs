@@ -296,8 +296,8 @@ namespace Finalv2
             enemyArmW = Content.Load<Texture2D>("Arm/enemyArmW");
 
             //drinking game
-            bgDrinkTexture = Content.Load<Texture2D>("Drinking/bg");
-            bottleTexture = Content.Load<Texture2D>("Drinking/bottle");
+            bgDrinkTexture= Content.Load<Texture2D>("Drinking/bg");
+            bottleTexture = Content.Load<Texture2D>("Drinking/bottle"); 
 
 
 
@@ -345,7 +345,7 @@ namespace Finalv2
 
 
             drinkingGameVoiceInstance = drinkingGameVoice.CreateInstance();
-
+ 
 
 
             winscreenVoiceInstance = winscreenVoice.CreateInstance();
@@ -641,6 +641,52 @@ namespace Finalv2
 
             //draw bottle in the center
             _spriteBatch.Draw(bottleTexture, new Vector2(1280 / 2, 720 / 2), null, Color.White, bottleRotation, new Vector2(130, 290), 1.0f, SpriteEffects.None, 0f);
+        }
+
+
+
+
+
+
+
+
+
+
+        //drinking game
+        private void drinkingGameLogic(GameTime gameTime)
+        {
+            //3 point at user
+            //6 point at enemy
+
+
+
+            //if space is pressed spin bottle
+            if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+            {
+                bottleRotation += 6f;
+            }
+
+            //if bottle roation not 0 wait
+            if (bottleRotation > 0)
+            {
+                bottleRotation -= 0.03f;
+            }
+
+            //windowtitle
+            Window.Title = bottleRotation.ToString();
+
+
+        }
+
+
+        //drinking game draw
+        private void drinkingGameDraw()
+        {
+            //draw bg
+            _spriteBatch.Draw(bgDrinkTexture, new Rectangle(0, 0, 1280, 720), Color.White);
+
+            //draw bottle in the center
+            _spriteBatch.Draw(bottleTexture, new Vector2(1280/2, 720/2), null, Color.White, bottleRotation, new Vector2(130, 290), 1.0f, SpriteEffects.None, 0f);
         }
 
 
