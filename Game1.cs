@@ -20,11 +20,10 @@ namespace Finalv2
         //screens
         enum Screen 
         {
-            Menu  ,
+            Menu,
             drinkingGame,
             armWrestling,
-            boxing ,
-            finalGame,
+            boxing,
 
             winscreen,
             losescreen 
@@ -41,7 +40,6 @@ namespace Finalv2
         SoundEffect armWrestlingVoice;
         SoundEffect boxingVoice;
         SoundEffect drinkingGameVoice;
-        SoundEffect finalGameVoice;
         SoundEffect winscreenVoice;
         SoundEffect losescreenVoice;
         SoundEffect againScreenVoice;
@@ -49,12 +47,11 @@ namespace Finalv2
         bool armWrestlingVoicePlayed = false;
         bool boxingVoicePlayed = false;
         bool drinkingGameVoicePlayed = false;
-        bool finalGameVoicePlayed = false;
         bool winscreenVoicePlayed = false;
         bool losescreenVoicePlayed = false;
         bool againScreenVoicePlayed = false;
 
-        SoundEffectInstance armWrestlingVoiceInstance, boxingVoiceInstance, drinkingGameVoiceInstance, finalGameVoiceInstance, winscreenVoiceInstance, losescreenVoiceInstance, againScreenVoiceInstance;
+        SoundEffectInstance armWrestlingVoiceInstance, boxingVoiceInstance, drinkingGameVoiceInstance, winscreenVoiceInstance, losescreenVoiceInstance, againScreenVoiceInstance;
 
 
 
@@ -66,28 +63,8 @@ namespace Finalv2
         Random rnd = new Random();
 
         #region drinking game
-        //textures
-        Texture2D bgDrink, bgNotDrink;
-        Texture2D leftArrow, rightArrow, upArrow, downArrow;
 
-        //combo varible 
-        int comboOne;
-        int comboTwo;
-        int comboThree;
-
-        //combo input
-        int inputOne;
-        int inputTwo;
-        int inputThree;
-
-        //bools
-        bool drinkingGameComplete = false;
-
-        bool inputOneComplete = false;
-        bool inputTwoComplete = false;
-        bool inputThreeComplete = false;
-
-
+        
 
 
 
@@ -276,13 +253,7 @@ namespace Finalv2
             enemyArmW = Content.Load<Texture2D>("Arm/enemyArmW");
 
             //drinking game
-            bgDrink = Content.Load<Texture2D>("Drinking/drinking");
-            bgNotDrink = Content.Load<Texture2D>("Drinking/nodrink");
-
-            leftArrow = Content.Load<Texture2D>("Drinking/arrow_left");
-            rightArrow = Content.Load<Texture2D>("Drinking/arrow_right");
-            upArrow = Content.Load<Texture2D>("Drinking/arrow_up");
-            downArrow = Content.Load<Texture2D>("Drinking/arrow_down");
+            
 
 
             //shooting
@@ -422,13 +393,6 @@ namespace Finalv2
                     
                 }
 
-                //if 4 is pressed
-                if (keyboardState.IsKeyDown(Keys.D4) && prevKeyboardState.IsKeyUp(Keys.D4))
-                {
-                    //currentScreen = Screen.shooting;
-                    
-                }
-
             }
 
             //if current screen is arm wrestling
@@ -476,7 +440,7 @@ namespace Finalv2
                     drinkingGameVoicePlayed = false;
                 }
 
-                drinkingGameLogic();
+                drinkingGameLogic(gameTime);
             }
 
             //if current screen is boxing
@@ -691,16 +655,16 @@ namespace Finalv2
 
 
         //drinking game
-        private void drinkingGameLogic()
+        private void drinkingGameLogic(GameTime gameTime)
         {
-
-           
+            
         }
 
             
         //drinking game draw
         private void drinkingGameDraw()
         {
+            
         }
 
 
