@@ -652,42 +652,7 @@ namespace Finalv2
 
 
 
-        //drinking game
-        private void drinkingGameLogic(GameTime gameTime)
-        {
-            //3 point at user
-            //6 point at enemy
-
-
-
-            //if space is pressed spin bottle
-            if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
-            {
-                bottleRotation += 6f;
-            }
-
-            //if bottle roation not 0 wait
-            if (bottleRotation > 0)
-            {
-                bottleRotation -= 0.03f;
-            }
-
-            //windowtitle
-            Window.Title = bottleRotation.ToString();
-
-
-        }
-
-
-        //drinking game draw
-        private void drinkingGameDraw()
-        {
-            //draw bg
-            _spriteBatch.Draw(bgDrinkTexture, new Rectangle(0, 0, 1280, 720), Color.White);
-
-            //draw bottle in the center
-            _spriteBatch.Draw(bottleTexture, new Vector2(1280/2, 720/2), null, Color.White, bottleRotation, new Vector2(130, 290), 1.0f, SpriteEffects.None, 0f);
-        }
+       
 
 
 
@@ -716,15 +681,7 @@ namespace Finalv2
 
 
 
-
-
-
-
-
-
-
-
-
+        #region arm wrestling
 
         //arm wrestling minigame logic
         private void armWrestlingLogic(GameTime gameTime)
@@ -845,21 +802,10 @@ namespace Finalv2
             //draw arm and spin/roate it based on the armRotation variable
             _spriteBatch.Draw(tempArm, new Vector2(700, 750), null, Color.White, armRotation, new Vector2(300, 490), 1.0f, SpriteEffects.None, 0f);
         }
+#endregion
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+        #region boxing
         //boxing logic
         private void boxingLogic(GameTime gameTime)
         {
@@ -1157,5 +1103,7 @@ namespace Finalv2
 
 
         }
+        #endregion
+
     }
 }
