@@ -60,6 +60,22 @@ namespace Finalv2
 
         SoundEffectInstance goodVoiceInstance, badVoiceInstance;
 
+
+        //music ost
+        SoundEffect introMusic, armWrestlingMusic, boxingMusic, drinkingGameMusic;
+        SoundEffectInstance introMusicInstance, armWrestlingMusicInstance, boxingMusicInstance, drinkingGameMusicInstance;
+
+        //soundeffects
+        SoundEffect punchSound, hurtSound, insultSound, gruntSound;
+        SoundEffectInstance punchSoundInstance, hurtSoundInstance, insultSoundInstance, gruntSoundInstance;
+
+
+
+
+
+
+
+
         //win and lose screen
         Texture2D winScreenTexture, loseScreenTexture;
 
@@ -70,6 +86,20 @@ namespace Finalv2
 
         //random number generator
         Random rnd = new Random();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         #region drinking game
 
@@ -102,14 +132,6 @@ namespace Finalv2
 
 
         #endregion
-
-
-
-
-
-
-
-
         #region arm wrestling
         //import texture
         Texture2D backgroundTexture, tempArm, backgroundTableTexture, enemyArmW;
@@ -146,19 +168,6 @@ namespace Finalv2
         const float eDuration = 2f;
         const float eAmount = 0.2f;
         //set to 2 sec for now
-
-
-        #endregion
-        #region shooting game
-        //shootingDuel variables
-
-        //bools
-        bool shootingDuelComplete = false;
-
-        //movement
-
-        //textures
-        Texture2D gunTexture, bgTextureShoot, stanceDuelTexture;
 
 
         #endregion
@@ -242,10 +251,13 @@ namespace Finalv2
         const float mouseHitCooldownDuration = 0.5f;
 
 
-
+        
 
 
         #endregion
+
+
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -384,6 +396,30 @@ namespace Finalv2
             goodVoiceInstance = good.CreateInstance();
             badVoiceInstance = bad.CreateInstance();
 
+            //game music
+            introMusic = Content.Load<SoundEffect>("sound/music/intro");
+            armWrestlingMusic = Content.Load<SoundEffect>("sound/music/armwreslting");
+            boxingMusic = Content.Load<SoundEffect>("sound/music/boxing");
+            drinkingGameMusic = Content.Load<SoundEffect>("sound/music/drinking");
+
+            introMusicInstance = introMusic.CreateInstance();
+            armWrestlingMusicInstance = armWrestlingMusic.CreateInstance();
+            boxingMusicInstance = boxingMusic.CreateInstance();
+            drinkingGameMusicInstance = drinkingGameMusic.CreateInstance();
+
+            //sound effects
+            punchSound = Content.Load<SoundEffect>("sound/soundeffect/punch");
+            hurtSound = Content.Load<SoundEffect>("sound/soundeffect/hurt");
+            insultSound = Content.Load<SoundEffect>("sound/soundeffect/insult");
+            gruntSound = Content.Load<SoundEffect>("sound/soundeffect/grunts");
+
+            punchSoundInstance = punchSound.CreateInstance();
+            hurtSoundInstance = hurtSound.CreateInstance();
+            insultSoundInstance = insultSound.CreateInstance();
+            gruntSoundInstance = gruntSound.CreateInstance();
+
+
+
 
 
 
@@ -421,8 +457,35 @@ namespace Finalv2
             prevKeyboardState = keyboardState;
             keyboardState = Keyboard.GetState();
 
+            //music volume and control
+            introMusicInstance.Volume = 0.1f;
+            armWrestlingMusicInstance.Volume = 0.1f;
+            boxingMusicInstance.Volume = 0.2f;
+            drinkingGameMusicInstance.Volume = 0.1f;
+
+            //sound effects volume
+            punchSoundInstance.Volume = 0.1f;
+            hurtSoundInstance.Volume = 0.5f;
+            insultSoundInstance.Volume = 0.2f;
+            gruntSoundInstance.Volume = 0.2f;
+
+            introMusicInstance.IsLooped = true;
+            armWrestlingMusicInstance.IsLooped = true;
+            boxingMusicInstance.IsLooped = true;
+            drinkingGameMusicInstance.IsLooped = true;
+
+
+
+
             if (currentScreen == 0)
             {
+                //stop all music and play screen music
+                introMusicInstance.Play();
+                drinkingGameMusicInstance.Stop();
+                armWrestlingMusicInstance.Stop();
+                boxingMusicInstance.Stop();
+
+
                 //if esc is pressed
                 if (keyboardState.IsKeyDown(Keys.Escape) && prevKeyboardState.IsKeyUp(Keys.Escape))
                 {
@@ -506,6 +569,12 @@ namespace Finalv2
             //if current screen is arm wrestling
             if (currentScreen == Screen.armWrestling)
             {
+                //stop all music and play screen music
+                introMusicInstance.Stop();
+                drinkingGameMusicInstance.Stop();
+                armWrestlingMusicInstance.Play();
+                boxingMusicInstance.Stop();
+
                 //play once
                 if (!armWrestlingVoicePlayed)
                 {
@@ -530,6 +599,12 @@ namespace Finalv2
             //if current screen is drinking game
             if (currentScreen == Screen.drinkingGame)
             {
+                //stop all music and play screen music
+                introMusicInstance.Stop();
+                drinkingGameMusicInstance.Play();
+                armWrestlingMusicInstance.Stop();
+                boxingMusicInstance.Stop();
+
                 //play once
                 if (!drinkingGameVoicePlayed)
                 {
@@ -549,7 +624,7 @@ namespace Finalv2
                         drinkingGameVoiceInstance.Stop();
                 }
                 //replay if missed
-                if (keyboardState.IsKeyDown(Keys.H) && prevKeyboardState.IsKeyUp(Keys.H))
+                if (keyboardState.IsKeyDown(Keys.R) && prevKeyboardState.IsKeyUp(Keys.R))
                 {
                     drinkingGameVoicePlayed = false;
                 }
@@ -560,6 +635,14 @@ namespace Finalv2
             //if current screen is boxing
             if (currentScreen == Screen.boxing)
             {
+
+                //stop all music and play screen music
+                introMusicInstance.Stop();
+                drinkingGameMusicInstance.Stop();
+                armWrestlingMusicInstance.Stop();
+                boxingMusicInstance.Play();
+
+
                 //play once
                 if (!boxingVoicePlayed)
                 {
@@ -594,6 +677,7 @@ namespace Finalv2
                 {
                     winscreenVoiceInstance.Play();
                     winscreenVoicePlayed = true;
+                    Window.Title = "Wildout West - You won! (space to return to menu)";
                 }
                 //stop play if input is detected
                 if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
@@ -613,6 +697,7 @@ namespace Finalv2
                 {
                     losescreenVoiceInstance.Play();
                     losescreenVoicePlayed = true;
+                    Window.Title = "Wildout West - You lost! (space to return to menu)";
                 }
                 //space return to menu
                 if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
@@ -706,7 +791,7 @@ namespace Finalv2
 
 
 
-
+        #region drinking game
 
         //drinking game
         private void drinkingGameLogic(GameTime gameTime)
@@ -716,7 +801,7 @@ namespace Finalv2
                 if (!choiceMade)
                 {
                     //window title
-                    Window.Title = $"Lives: {lives} | Correct: {correctCount}  -  Press H for Hold or D for Draw";
+                    Window.Title = $"Lives: {lives} | Correct: {correctCount}  -  Press H for Hold or D for Draw (esc to return/'R' for help)";
                     if (keyboardState.IsKeyDown(Keys.H) && prevKeyboardState.IsKeyUp(Keys.H))
                     {
                         choiceMade = true;
@@ -784,12 +869,12 @@ namespace Finalv2
                     if (playerGuessedCorrectly)
                     {
                         correctCount++; //gain a point
-                                        //no sound on correct
+                        goodVoiceInstance.Play();            
                     }
                     else
                     {
                         lives--;               //lose a life
-                        badVoiceInstance.Play(); //play only when life is removed
+                        badVoiceInstance.Play(); 
                     }
 
                     choiceMade = false; //reset choice
@@ -798,13 +883,18 @@ namespace Finalv2
                     if (correctCount >= 2)
                     {
                         //win if 2/3 are met
+                        badVoiceInstance.Stop();
+                        goodVoiceInstance.Stop();
                         currentScreen = Screen.winscreen;
                         drinkingGameOver = true;
                         ResetDrinkingGame();
+                        
                     }
                     else if (lives <= 0)
                     {
                         //lose if lives are 0
+                        badVoiceInstance.Stop();
+                        goodVoiceInstance.Stop();
                         currentScreen = Screen.losescreen;
                         drinkingGameOver = true;
                         ResetDrinkingGame();
@@ -848,42 +938,7 @@ namespace Finalv2
             Window.Title = "Wildout West";
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        #endregion
 
 
         #region arm wrestling
@@ -1026,6 +1081,20 @@ namespace Finalv2
 
             bool justPressed = _mouseState.LeftButton == ButtonState.Pressed && prevMouseState.LeftButton == ButtonState.Released;
 
+
+            //display enemy health
+            Window.Title = $"Wildout West - Boxing (esc to return/'H' for help) | Enemy Health: {enemyHealth}/{maxEnemyHealth}";
+
+            Texture2D currentEnemySprite;
+            if (enemyHurt)
+                currentEnemySprite = enemyHurtTexture;
+            else if (enemyPunching)
+                currentEnemySprite = enemyPunchTexture;
+            else if (enemyWindingUp)
+                currentEnemySprite = enemyGuardTexture;
+            else
+                currentEnemySprite = enemyBlockTexture;
+
             if (hurtTimer > 0f)
             {
                 hurtTimer -= gametime;
@@ -1035,6 +1104,25 @@ namespace Finalv2
             if (mouseHitCooldown > 0f)
                 mouseHitCooldown -= (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+            //if playerhealth is 0, go to lose screen
+            if (playerHealth <= 0)
+            {
+                currentScreen = Screen.losescreen;
+                playerHealth = 3; //reset health
+                playerStamina = maxPlayerStamina; //reset stamina
+                enemyHealth = maxEnemyHealth; //reset enemy health
+                boxingVoiceInstance.Stop();
+            }
+
+            //if enemy health is 0, go to win screen
+            if (enemyHealth <= 0)
+            {
+                currentScreen = Screen.winscreen;
+                playerHealth = 3; //reset health
+                playerStamina = maxPlayerStamina; //reset stamina
+                enemyHealth = maxEnemyHealth; //reset enemy health
+                boxingVoiceInstance.Stop();
+            }
 
             //blocking
             isBlocking = keyboardstate.IsKeyDown(Keys.Space) || mousestate.RightButton == ButtonState.Pressed;
@@ -1065,15 +1153,17 @@ namespace Finalv2
             }
 
             //countering
-            if (!enemyWindingUp && !enemyPunching && !enemyHurt)
+            if (!enemyHurt)
             {
-
-                //crosshair need to be on enemy
                 var enemyCenter = windowSize / 2 + offset + new Vector2(enemyXOffset * drawScale, enemyYOffset * drawScale);
-                var tex = enemyPunchTexture;
-                var bounds = new Rectangle((int)(enemyCenter.X - tex.Width / 2 * drawScale), (int)(enemyCenter.Y - tex.Height / 2 * drawScale), (int)(tex.Width * drawScale), (int)(tex.Height * drawScale));
+                var bounds = new Rectangle(
+                    (int)(enemyCenter.X - currentEnemySprite.Width / 2 * drawScale),
+                    (int)(enemyCenter.Y - currentEnemySprite.Height / 2 * drawScale),
+                    (int)(currentEnemySprite.Width * drawScale),
+                    (int)(currentEnemySprite.Height * drawScale)
+                );
 
-                if (justPressed && bounds.Contains(_mouseState.X, _mouseState.Y) && playerStamina > 0 && rnd.NextDouble() < 0.7 && scaleZoom >= punchRangeScale)
+                if (justPressed && bounds.Contains(_mouseState.X, _mouseState.Y) && playerStamina > 0 && scaleZoom >= punchRangeScale && !enemyBlock)
                 {
                     enemyHurt = true;
                     hurtTimer = hurtTime;
@@ -1082,10 +1172,11 @@ namespace Finalv2
                     playerStamina--;
                     staminaRechargeTimer = 0f;
                     mouseHitCooldown = mouseHitCooldownDuration;
+                    punchSoundInstance.Volume = 0.1f;
+                    punchSoundInstance.Play();
+                    hurtSoundInstance.Play();
                 }
 
-
-                else enemyHurt = false;
             }
 
             bool inRange = scaleZoom >= punchRangeScale;
@@ -1175,7 +1266,13 @@ namespace Finalv2
                             punchTimer = punchHoldTime;
 
                             //apply player damage
-                            if (!isBlocking) playerHealth--;
+                            if (!isBlocking)
+                            {
+                                playerHealth--;
+                                punchSoundInstance.Play();
+                            }
+                            punchSoundInstance.Volume = 0.05f;
+                            punchSoundInstance.Play();
                         }
                     }
 

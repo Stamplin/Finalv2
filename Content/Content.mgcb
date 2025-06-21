@@ -301,6 +301,30 @@
 /processorParam:Quality=Best
 /build:sound/music/intro.mp3
 
+#begin sound/soundeffect/grunts.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sound/soundeffect/grunts.mp3
+
+#begin sound/soundeffect/hurt.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sound/soundeffect/hurt.mp3
+
+#begin sound/soundeffect/insult.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sound/soundeffect/insult.mp3
+
+#begin sound/soundeffect/punch.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:sound/soundeffect/punch.mp3
+
 #begin sound/win.mp3
 /importer:Mp3Importer
 /processor:SoundEffectProcessor
