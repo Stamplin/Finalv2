@@ -15,10 +15,10 @@ namespace Finalv2
         MouseState _mouseState;
         KeyboardState _keyboardState;
 
-        Vector2 windowSize = new (1280, 720);
+        Vector2 windowSize = new(1280, 720);
 
         //screens
-        enum Screen 
+        enum Screen
         {
             Menu,
             drinkingGame,
@@ -26,7 +26,7 @@ namespace Finalv2
             boxing,
 
             winscreen,
-            losescreen 
+            losescreen
 
         };
 
@@ -57,20 +57,35 @@ namespace Finalv2
 
 
 
-        Screen currentScreen ;
+        Screen currentScreen;
 
         //random number generator
         Random rnd = new Random();
 
         #region drinking game
 
-        
+        //textures
+        Texture2D bgDrinkTexture, bottleTexture;
+
+        //variables
+        float bottleRotation = 0f;
+        int pointingWin = 0;
+
+
 
 
 
 
 
         #endregion
+
+
+
+
+
+
+
+
         #region arm wrestling
         //import texture
         Texture2D backgroundTexture, tempArm, backgroundTableTexture, enemyArmW;
@@ -97,14 +112,14 @@ namespace Finalv2
 
 
         //smoothening
-        float targetRotation = 0.4f; 
+        float targetRotation = 0.4f;
         const float rotationLerpSpeed = 5f;
 
         //ai help mechanics
         bool eUsed = false;
-        bool eActive = false;       
-        float eTimer = 0f;             
-        const float eDuration = 2f;     
+        bool eActive = false;
+        float eTimer = 0f;
+        const float eDuration = 2f;
         const float eAmount = 0.2f;
         //set to 2 sec for now
 
@@ -176,16 +191,16 @@ namespace Finalv2
 
 
         //combat
-        const float punchRangeScale = 1.6f; 
-        const float punchWindupTime = 0.5f;   
+        const float punchRangeScale = 1.6f;
+        const float punchWindupTime = 0.5f;
         const float punchHoldTime = 0.5f;
-        float punchTimer = 0f;     
-        bool enemyWindingUp = false; 
+        float punchTimer = 0f;
+        bool enemyWindingUp = false;
         bool enemyPunching = false;
         float hurtTimer = 0f;
         const float hurtTime = 0.3f;
         const int maxEnemyHealth = 10;
-       
+
 
         //for guard cooldown before/after punch
         const float postPunchGuardTime = 1f;
@@ -214,6 +229,15 @@ namespace Finalv2
             IsMouseVisible = false;
         }
 
+
+
+
+
+
+
+
+
+
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
@@ -226,7 +250,7 @@ namespace Finalv2
 
 
             //boxing
-            fistPosition = new Vector2(720/2, 350);
+            fistPosition = new Vector2(720 / 2, 350);
 
             //combat - boxing
             enemyPosition = new Vector2(windowSize.X / 2 + 200, windowSize.Y / 2);
@@ -235,11 +259,30 @@ namespace Finalv2
 
             //current screen
             currentScreen = 0;
-            
 
 
             base.Initialize();
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         protected override void LoadContent()
         {
@@ -253,13 +296,14 @@ namespace Finalv2
             enemyArmW = Content.Load<Texture2D>("Arm/enemyArmW");
 
             //drinking game
-            
+            bgDrinkTexture = Content.Load<Texture2D>("Drinking/bg");
+            bottleTexture = Content.Load<Texture2D>("Drinking/bottle");
 
 
-            //shooting
-            gunTexture = Content.Load<Texture2D>("Shooting/pistol");
-            bgTextureShoot = Content.Load<Texture2D>("Shooting/duelBG");
-            stanceDuelTexture = Content.Load<Texture2D>("Shooting/pose");
+
+
+
+
 
             //boxing
             ringBg = Content.Load<Texture2D>("Boxing/boxingbg");
@@ -277,6 +321,9 @@ namespace Finalv2
             heartTexture = Content.Load<Texture2D>("Boxing/heart");
             gloveTexture = Content.Load<Texture2D>("Boxing/stam");
 
+
+
+
             //screens and sounds
             menuTexture = Content.Load<Texture2D>("screen/menu");
             menuVoice = Content.Load<SoundEffect>("sound/intro");
@@ -284,16 +331,23 @@ namespace Finalv2
 
             armWrestlingVoice = Content.Load<SoundEffect>("sound/armwrestle");
             boxingVoice = Content.Load<SoundEffect>("sound/boxing");
+
+
             drinkingGameVoice = Content.Load<SoundEffect>("sound/drinking");
-            //finalGameVoice = Content.Load<SoundEffect>("sound/shooting");
+
+
             winscreenVoice = Content.Load<SoundEffect>("sound/win");
             losescreenVoice = Content.Load<SoundEffect>("sound/lose");
             againScreenVoice = Content.Load<SoundEffect>("sound/again");
 
             armWrestlingVoiceInstance = armWrestlingVoice.CreateInstance();
             boxingVoiceInstance = boxingVoice.CreateInstance();
+
+
             drinkingGameVoiceInstance = drinkingGameVoice.CreateInstance();
-            //finalGameVoiceInstance = finalGameVoice.CreateInstance();
+
+
+
             winscreenVoiceInstance = winscreenVoice.CreateInstance();
             losescreenVoiceInstance = losescreenVoice.CreateInstance();
             againScreenVoiceInstance = againScreenVoice.CreateInstance();
@@ -308,11 +362,32 @@ namespace Finalv2
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         protected override void Update(GameTime gameTime)
         {
-           float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-           prevKeyboardState = keyboardState;
-           keyboardState = Keyboard.GetState();
+            float gametime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            prevKeyboardState = keyboardState;
+            keyboardState = Keyboard.GetState();
 
             if (currentScreen == 0)
             {
@@ -359,7 +434,6 @@ namespace Finalv2
                 armWrestlingVoiceInstance.Stop();
                 boxingVoiceInstance.Stop();
                 drinkingGameVoiceInstance.Stop();
-                //finalGameVoiceInstance.Stop();
                 winscreenVoiceInstance.Stop();
                 losescreenVoiceInstance.Stop();
             }
@@ -376,21 +450,21 @@ namespace Finalv2
                 if (keyboardState.IsKeyDown(Keys.D1) && prevKeyboardState.IsKeyUp(Keys.D1))
                 {
                     currentScreen = Screen.drinkingGame;
-                    
+
                 }
 
                 //if 2 is pressed
                 if (keyboardState.IsKeyDown(Keys.D2) && prevKeyboardState.IsKeyUp(Keys.D2))
                 {
                     currentScreen = Screen.armWrestling;
-                    
+
                 }
 
                 //if 3 is pressed
                 if (keyboardState.IsKeyDown(Keys.D3) && prevKeyboardState.IsKeyUp(Keys.D3))
                 {
                     currentScreen = Screen.boxing;
-                    
+
                 }
 
             }
@@ -468,9 +542,22 @@ namespace Finalv2
             }
 
 
-            
+
             base.Update(gameTime);
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         protected override void Draw(GameTime gameTime)
         {
@@ -483,7 +570,7 @@ namespace Finalv2
             if (currentScreen == 0)
             {
                 _spriteBatch.Draw(menuTexture, new Rectangle(0, 0, 1280, 720), Color.White);
-            }            
+            }
 
             //if current screen is arm wrestling
             if (currentScreen == Screen.armWrestling)
@@ -509,6 +596,72 @@ namespace Finalv2
 
             base.Draw(gameTime);
         }
+
+
+
+
+
+
+
+
+
+
+        //drinking game
+        private void drinkingGameLogic(GameTime gameTime)
+        {
+            //3 point at user
+            //6 point at enemy
+
+
+
+            //if space is pressed spin bottle
+            if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+            {
+                bottleRotation += 6f;
+            }
+
+            //if bottle roation not 0 wait
+            if (bottleRotation > 0)
+            {
+                bottleRotation -= 0.03f;
+            }
+
+            //windowtitle
+            Window.Title = bottleRotation.ToString();
+
+
+        }
+
+
+        //drinking game draw
+        private void drinkingGameDraw()
+        {
+            //draw bg
+            _spriteBatch.Draw(bgDrinkTexture, new Rectangle(0, 0, 1280, 720), Color.White);
+
+            //draw bottle in the center
+            _spriteBatch.Draw(bottleTexture, new Vector2(1280 / 2, 720 / 2), null, Color.White, bottleRotation, new Vector2(130, 290), 1.0f, SpriteEffects.None, 0f);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -615,7 +768,7 @@ namespace Finalv2
             }
 
             //smooth rotation
-            armRotation = MathHelper.Lerp(armRotation,targetRotation,rotationLerpSpeed * gametime);
+            armRotation = MathHelper.Lerp(armRotation, targetRotation, rotationLerpSpeed * gametime);
             targetRotation = MathHelper.Clamp(targetRotation, minRotation, maxRotation);
 
         }
@@ -633,8 +786,8 @@ namespace Finalv2
             float enemyXOffset = 0f;
             if (armRotation > 0.4f)
             {
-                float shiftAmount = 450f; 
-                float t = (armRotation - 0.4f) / (maxRotation - 0.4f); 
+                float shiftAmount = 450f;
+                float t = (armRotation - 0.4f) / (maxRotation - 0.4f);
                 enemyXOffset = MathHelper.Clamp(t * shiftAmount, 0f, shiftAmount);
             }
 
@@ -650,45 +803,6 @@ namespace Finalv2
 
 
 
-
-
-
-
-        //drinking game
-        private void drinkingGameLogic(GameTime gameTime)
-        {
-            
-        }
-
-            
-        //drinking game draw
-        private void drinkingGameDraw()
-        {
-            
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //shooting game
-        private void shootingLogic()
-        {
-        }
-
-        //shooting game draw
-        private void shootingDraw()
-        {
-        }
 
 
 
