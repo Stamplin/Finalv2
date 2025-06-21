@@ -44,6 +44,8 @@ namespace Finalv2
         SoundEffect losescreenVoice;
         SoundEffect againScreenVoice;
 
+        SoundEffect good, bad;
+
         bool armWrestlingVoicePlayed = false;
         bool boxingVoicePlayed = false;
         bool drinkingGameVoicePlayed = false;
@@ -51,8 +53,15 @@ namespace Finalv2
         bool losescreenVoicePlayed = false;
         bool againScreenVoicePlayed = false;
 
+        bool goodVoicePlayed = false, badVoicePlayed = false;
+
+
         SoundEffectInstance armWrestlingVoiceInstance, boxingVoiceInstance, drinkingGameVoiceInstance, winscreenVoiceInstance, losescreenVoiceInstance, againScreenVoiceInstance;
 
+        SoundEffectInstance goodVoiceInstance, badVoiceInstance;
+
+        //win and lose screen
+        Texture2D winScreenTexture, loseScreenTexture;
 
 
 
@@ -69,7 +78,22 @@ namespace Finalv2
 
         //variables
         float bottleRotation = 0f;
-        int pointingWin = 0;
+        bool isSpinning = false;
+        float spinSpeed = 0f;
+        int spinDirection = 1; //pos cw and neg ccw
+
+        float finalTarget = 0f;        
+        int lives = 3;               
+        bool choiceMade = false;//if the player has pressed H or D
+        bool betHold = false;//choice made (true for H, false for D)
+
+        int spinCount = 0;//track round         
+        int correctCount = 0;//track correct guesses
+        bool spinWillLandOnUser = false;
+        const float landingOffsetRange = 0.25f; //so wont be stright
+        bool drinkingGameOver = false; //win lose
+
+
 
 
 
@@ -353,6 +377,14 @@ namespace Finalv2
             againScreenVoiceInstance = againScreenVoice.CreateInstance();
 
 
+            //ingame sound
+            good = Content.Load<SoundEffect>("sound/good");
+            bad = Content.Load<SoundEffect>("sound/bad");
+
+            goodVoiceInstance = good.CreateInstance();
+            badVoiceInstance = bad.CreateInstance();
+
+
 
 
 
@@ -450,13 +482,14 @@ namespace Finalv2
                 if (keyboardState.IsKeyDown(Keys.D1) && prevKeyboardState.IsKeyUp(Keys.D1))
                 {
                     currentScreen = Screen.drinkingGame;
-
+                    ResetDrinkingGame();
                 }
 
                 //if 2 is pressed
                 if (keyboardState.IsKeyDown(Keys.D2) && prevKeyboardState.IsKeyUp(Keys.D2))
                 {
                     currentScreen = Screen.armWrestling;
+                    Window.Title = "Wildout West - Arm Wreslting (esc to return/'H' for help)";
 
                 }
 
@@ -464,6 +497,7 @@ namespace Finalv2
                 if (keyboardState.IsKeyDown(Keys.D3) && prevKeyboardState.IsKeyUp(Keys.D3))
                 {
                     currentScreen = Screen.boxing;
+                    Window.Title = "Wildout West - Boxing (esc to return/'H' for help)";
 
                 }
 
@@ -508,6 +542,12 @@ namespace Finalv2
                     if (drinkingGameVoiceInstance.State == SoundState.Playing)
                         drinkingGameVoiceInstance.Stop();
                 }
+                //voice fix
+                if ((keyboardState.IsKeyDown(Keys.H) && prevKeyboardState.IsKeyUp(Keys.H)) || (keyboardState.IsKeyDown(Keys.D) && prevKeyboardState.IsKeyUp(Keys.D)))
+                {
+                    if (drinkingGameVoiceInstance.State == SoundState.Playing)
+                        drinkingGameVoiceInstance.Stop();
+                }
                 //replay if missed
                 if (keyboardState.IsKeyDown(Keys.H) && prevKeyboardState.IsKeyUp(Keys.H))
                 {
@@ -541,6 +581,48 @@ namespace Finalv2
                 boxingLogic(gameTime);
             }
 
+
+
+
+
+
+            //win screen 
+            if (currentScreen == Screen.winscreen)
+            {
+                //play once
+                if (!winscreenVoicePlayed)
+                {
+                    winscreenVoiceInstance.Play();
+                    winscreenVoicePlayed = true;
+                }
+                //stop play if input is detected
+                if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+                {
+                    currentScreen = Screen.Menu;
+                    winscreenVoiceInstance.Stop();
+                    againScreenVoiceInstance.Play();
+                }
+
+            }
+
+            //lose screen
+            if (currentScreen == Screen.losescreen)
+            {
+                //play once
+                if (!losescreenVoicePlayed)
+                {
+                    losescreenVoiceInstance.Play();
+                    losescreenVoicePlayed = true;
+                }
+                //space return to menu
+                if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+                {
+                    currentScreen = Screen.Menu;
+                    losescreenVoiceInstance.Stop();
+                    againScreenVoiceInstance.Play();
+
+                }
+            }
 
 
             base.Update(gameTime);
@@ -606,31 +688,138 @@ namespace Finalv2
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         //drinking game
         private void drinkingGameLogic(GameTime gameTime)
         {
-            //3 point at user
-            //6 point at enemy
-
-
-
-            //if space is pressed spin bottle
-            if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+            if (!isSpinning)
             {
-                bottleRotation += 6f;
-            }
+                if (!choiceMade)
+                {
+                    //window title
+                    Window.Title = $"Lives: {lives} | Correct: {correctCount}  -  Press H for Hold or D for Draw";
+                    if (keyboardState.IsKeyDown(Keys.H) && prevKeyboardState.IsKeyUp(Keys.H))
+                    {
+                        choiceMade = true;
+                        betHold = true; //bet hold
+                    }
+                    else if (keyboardState.IsKeyDown(Keys.D) && prevKeyboardState.IsKeyUp(Keys.D))
+                    {
+                        choiceMade = true;
+                        betHold = false; //bet draw
+                    }
+                }
+                //wait for space
+                else
+                {
+                    Window.Title = $"Lives: {lives} | Correct: {correctCount}  -  You have chosen. Press Space to spin!";
+                    if (keyboardState.IsKeyDown(Keys.Space) && prevKeyboardState.IsKeyUp(Keys.Space))
+                    {
+                        if (drinkingGameVoiceInstance.State == SoundState.Playing)
+                        {
+                            //stop all audio
+                            drinkingGameVoiceInstance.Stop();
+                            goodVoiceInstance.Stop();
+                            badVoiceInstance.Stop();
+                        }
 
-            //if bottle roation not 0 wait
-            if (bottleRotation > 0)
+                        isSpinning = true;
+
+                        //spin direction and speed
+                        spinDirection = rnd.Next(2) == 0 ? 1 : -1;
+                        spinSpeed = (float)(rnd.NextDouble() * 0.1 + 0.15);
+
+                        //roll who win
+                        spinWillLandOnUser = (rnd.Next(2) == 0);
+
+                        //animation and ui stuff
+                        float fullRotations = MathHelper.TwoPi * rnd.Next(3, 6);
+                        float randomOffset = (float)(rnd.NextDouble() * 2 - 1) * landingOffsetRange;
+                        float endAngle = (spinWillLandOnUser ? MathHelper.Pi : MathHelper.TwoPi) + randomOffset;
+                        float totalRotationDelta = fullRotations + endAngle;
+                        finalTarget = bottleRotation + (totalRotationDelta * spinDirection);
+                    }
+                }
+            }
+            //if the bottle is spinning
+            else
             {
-                bottleRotation -= 0.03f;
+                Window.Title = "Spinning...";
+
+                //animate the bottle rotation
+                bottleRotation += spinSpeed * spinDirection;
+
+                bool finishedSpinning = false;
+                if (spinDirection > 0 && bottleRotation >= finalTarget) finishedSpinning = true;
+                else if (spinDirection < 0 && bottleRotation <= finalTarget) finishedSpinning = true;
+
+                //check result
+                if (finishedSpinning)
+                {
+                    isSpinning = false; //stop the spin.
+                    bottleRotation = finalTarget;
+
+                    //check if the player's bet was correct.
+                    bool playerGuessedCorrectly = (betHold && spinWillLandOnUser) || (!betHold && !spinWillLandOnUser);
+
+                    if (playerGuessedCorrectly)
+                    {
+                        correctCount++; //gain a point
+                                        //no sound on correct
+                    }
+                    else
+                    {
+                        lives--;               //lose a life
+                        badVoiceInstance.Play(); //play only when life is removed
+                    }
+
+                    choiceMade = false; //reset choice
+
+                    //check win/lose conditions
+                    if (correctCount >= 2)
+                    {
+                        //win if 2/3 are met
+                        currentScreen = Screen.winscreen;
+                        drinkingGameOver = true;
+                        ResetDrinkingGame();
+                    }
+                    else if (lives <= 0)
+                    {
+                        //lose if lives are 0
+                        currentScreen = Screen.losescreen;
+                        drinkingGameOver = true;
+                        ResetDrinkingGame();
+                    }
+                }
             }
-
-            //windowtitle
-            Window.Title = bottleRotation.ToString();
-
-
         }
+
+
+
+
+
+
+
+
 
 
         //drinking game draw
@@ -638,9 +827,25 @@ namespace Finalv2
         {
             //draw bg
             _spriteBatch.Draw(bgDrinkTexture, new Rectangle(0, 0, 1280, 720), Color.White);
+            //bottle
+            _spriteBatch.Draw(bottleTexture, new Vector2(1280 / 2, 720 / 2), null, Color.White, bottleRotation, new Vector2(bottleTexture.Width / 2, bottleTexture.Height / 2), 1.0f, SpriteEffects.None, 0f);
+        }
 
-            //draw bottle in the center
-            _spriteBatch.Draw(bottleTexture, new Vector2(1280 / 2, 720 / 2), null, Color.White, bottleRotation, new Vector2(130, 290), 1.0f, SpriteEffects.None, 0f);
+        private void ResetDrinkingGame()
+        {
+            //reset all the variables to their starting values
+            drinkingGameOver = false;
+            lives = 3;
+            correctCount = 0;
+            choiceMade = false;
+            isSpinning = false;
+            bottleRotation = 0f;
+
+            //allow the intro voice to play again
+            drinkingGameVoicePlayed = false;
+
+            //reset window title
+            Window.Title = "Wildout West";
         }
 
 
@@ -652,7 +857,7 @@ namespace Finalv2
 
 
 
-       
+
 
 
 
